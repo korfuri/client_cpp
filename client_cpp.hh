@@ -64,13 +64,36 @@ private:
   std::string const name_;
 };
 
+class Gauge {
+public:
+  Gauge() {}
+  ~Gauge() {}
+
+  void set(double value) {
+    value_.store(value);
+  }
+
+  double value() const {
+    return value_.load();
+  }
+
+protected:
+  std::atomic<double> value_;
+};
+
+
 class Counter {
 public:
   Counter() {}
   ~Counter() {}
 
-  void set(double value) {
-    value_.store(value);
+  void inc(double value = 1.0) {
+    // if (value < 0) throw Something();
+    double oldv, newv;
+    do {
+      oldv = value_.load();
+      newv = oldv + value;
+    } while (value_.exchange(newv) != oldv);
   }
 
   double value() const {
