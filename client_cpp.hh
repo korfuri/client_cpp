@@ -5,6 +5,7 @@
 
 # include <array>
 # include <atomic>
+# include <mutex>
 # include <ostream>
 # include <string>
 # include <type_traits>
@@ -22,11 +23,13 @@ public:
   }
   
   MetricType& labels(stringarray const& labelvalues) {
+    std::unique_lock<std::mutex> l(mutex_);
     return values_[labelvalues];
   }
 
   void output(std::ostream& os) const {
     os << "# TYPE gauge" << std::endl;
+    std::unique_lock<std::mutex> l(mutex_);
     for (const auto& it_v : values_) {
       os << name_;
       char next_separator = '{';
@@ -43,7 +46,7 @@ public:
 private:
   const std::string name_;
   stringarray const labelnames_;
-
+  mutable std::mutex mutex_;
   std::unordered_map<stringarray, MetricType, ContainerHash<stringarray>, ContainerEq<stringarray>> values_;
 };
 
