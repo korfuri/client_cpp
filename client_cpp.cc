@@ -26,12 +26,19 @@ int main() {
   bloops.inc();
   bloops.output(std::cout);
 
-  Histogram blups("blups", {0, 1, 10, 100, 1000, 10000});
+  Histogram<0> blups("blups", {0, 1, 10, 100, 1000, 10000});
   blups.add(.5);
   blups.add(5);
   blups.add(10);
   blups.add(10000000);
   blups.output(std::cout);
+
+  Histogram<2> blups_by_blip_blop("blups_by_blip_blop", {0, 1, 10, 100, 1000, 10000}, {"blip", "blop"});
+  blups_by_blip_blop.add(.5, {"a", "b"});
+  blups_by_blip_blop.add(5, {"a", "b"});
+  blups_by_blip_blop.add(10, {"a", "c"});
+  blups_by_blip_blop.add(10000000, {"e", "d"});
+  blups_by_blip_blop.output(std::cout);
 
   return 0;
 }

@@ -20,7 +20,7 @@ namespace prometheus {
     template<int N, class MetricType>
     class LabeledMetric {
       typedef std::array<std::string, N> stringarray;
-  
+
     public:
       LabeledMetric(std::string const& name,
 		    stringarray const& labelnames) :
@@ -39,8 +39,10 @@ namespace prometheus {
 	for (const auto& it_v : values_) {
 	  os << name_;
 	  char next_separator = '{';
+	  auto labelname_it = labelnames_.begin();
 	  for (const auto& it_l : it_v.first) {
-	    os << next_separator << "labelname_goes_here" << "=" << it_l;
+	    os << next_separator << *labelname_it << "=" << it_l;
+	    ++labelname_it;
 	    next_separator = ',';
 	  }
 	  os << "} = ";
@@ -117,7 +119,7 @@ namespace prometheus {
   template<> class Gauge<0> : public impl::UnlabeledMetric<impl::Gauge> {
     using impl::UnlabeledMetric<impl::Gauge>::UnlabeledMetric;
   };
-  
+
   template<int N> class Counter : public impl::LabeledMetric<N, impl::Counter> {
     using impl::LabeledMetric<N, impl::Counter>::LabeledMetric;
   };
@@ -125,10 +127,12 @@ namespace prometheus {
     using impl::UnlabeledMetric<impl::Counter>::UnlabeledMetric;
   };
 
-  class Histogram {
-  public:
-    Histogram(std::string const& name, std::vector<double> const& levels) :
-      counters_(name, {"le"}),
+  template<int N>
+  class BaseHistogram {
+    typedef std::array<std::string, N+1> stringarray;
+  protected:
+    BaseHistogram(std::string const& name, std::vector<double> const& levels, stringarray const& labels) :
+      counters_(name, labels),
       levels_(levels.size()),
       last_level_is_inf_(isposinf(levels[levels.size() - 1]))
     {
@@ -146,9 +150,49 @@ namespace prometheus {
       return std::to_string(d);
     }
 
+  public:
     void output(std::ostream& os) const {
       counters_.output(os);
     }
+
+  protected:
+    Counter<N+1> counters_;
+    std::vector<std::pair<double, std::string>> levels_;
+    bool last_level_is_inf_;
+  };
+
+  template<int N, typename T = std::string>
+  std::array<T, N+1> extend_array(std::array<T, N> const& ar, T const& v) {
+    std::array<T, N+1> ret;
+    std::copy(ar.begin(), ar.end(), ret.begin());
+    ret[ret.size() - 1] = v;
+    return ret;
+  }
+
+  template<int N>
+  class Histogram : public BaseHistogram<N> {
+    typedef std::array<std::string, N> stringarray;
+  public:
+    Histogram(std::string const& name, std::vector<double> const& levels, stringarray const& labels) :
+      BaseHistogram<N>(name, levels, extend_array(labels, std::string("le"))) {}
+
+    void add(double value, stringarray const& labels) {
+      for (auto const& lvl : this->levels_) {
+    	if (value > lvl.first) {
+    	  this->counters_.labels(extend_array<N, std::string>(labels, lvl.second)).inc();
+    	}
+      }
+      if (!this->last_level_is_inf_) {
+    	this->counters_.labels(extend_array<N, std::string>(labels, "+Inf")).inc();
+      }
+    }
+  };
+
+  template<>
+  class Histogram<0> : public BaseHistogram<0> {
+  public:
+    Histogram(std::string const& name, std::vector<double> const& levels) :
+      BaseHistogram<0>(name, levels, {{"le"}}) {}
 
     void add(double value) {
       for (auto const& lvl : levels_) {
@@ -160,11 +204,6 @@ namespace prometheus {
 	counters_.labels({{"+Inf"}}).inc();
       }
     }
-
-  private:
-    Counter<1> counters_;
-    std::vector<std::pair<double, std::string>> levels_;
-    bool last_level_is_inf_;
   };
 
 }  /* namespace prometheus */
