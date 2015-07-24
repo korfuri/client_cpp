@@ -17,8 +17,56 @@ namespace prometheus {
 
   namespace impl {
 
+    class AMetric;
+
+    class OutputFormatter {
+    public:
+      OutputFormatter(std::ostream& os);
+
+      void addMetric(std::string const& name,
+		     std::string const& type) {
+	os_ << "# TYPE " << type << std::endl;
+      }
+
+      template<typename LabelIterator>
+      void addMetricRow(std::string const& name,
+			LabelIterator const& labels_begin,
+			LabelIterator const& labels_end,
+			double value) {
+	if (labels_begin == labels_end) {
+	  os_ << name << " = " << value << std::endl;
+	} else {
+	  os_ << name;
+	  char nextchar = '{';
+	  for (auto it = labels_begin; it != labels_end; ++it) {
+	    os_ << nextchar << it->first << '=' << it->second;
+	    nextchar = ',';
+	  }
+	  os_ << "} = " << value << std::endl;
+	}
+      }
+
+    private:
+      std::ostream& os_;
+    };
+
+    class Registry {
+    public:
+      void register_metric(AMetric* metric);
+      void output(std::ostream& os) const;
+    private:
+      std::vector<AMetric*> metrics_;
+    };
+
+    class AMetric {
+    public:
+      AMetric();
+      AMetric(Registry* reg);
+      virtual void output(std::ostream&) const = 0;
+    };
+
     template<int N, class MetricType>
-    class LabeledMetric {
+    class LabeledMetric : public AMetric {
       typedef std::array<std::string, N> stringarray;
 
     public:
@@ -33,7 +81,7 @@ namespace prometheus {
 	return values_[labelvalues];
       }
 
-      void output(std::ostream& os) const {
+      virtual void output(std::ostream& os) const {
 	os << "# TYPE gauge" << std::endl;
 	std::unique_lock<std::mutex> l(mutex_);
 	for (const auto& it_v : values_) {
@@ -59,11 +107,11 @@ namespace prometheus {
     };
 
     template<class MetricType>
-    class UnlabeledMetric : public MetricType {
+    class UnlabeledMetric : public AMetric, public MetricType {
     public:
       UnlabeledMetric(std::string const& name) : name_(name) {}
 
-      void output(std::ostream& os) const {
+      virtual void output(std::ostream& os) const {
 	os << "# TYPE gauge" << std::endl;
 	os << name_ << " = " << this->value_ << std::endl;
       }
@@ -82,10 +130,10 @@ namespace prometheus {
       }
 
     private:
-      BaseScalarMetric(BaseScalarMetric const&);
-      BaseScalarMetric(BaseScalarMetric&);
-      BaseScalarMetric& operator=(BaseScalarMetric const&);
-      BaseScalarMetric& operator=(BaseScalarMetric&&);
+      BaseScalarMetric(BaseScalarMetric const&) = delete;
+      BaseScalarMetric(BaseScalarMetric&) = delete;
+      BaseScalarMetric& operator=(BaseScalarMetric const&) = delete;
+      BaseScalarMetric& operator=(BaseScalarMetric&&) = delete;
 
     protected:
       std::atomic<double> value_;
@@ -128,7 +176,7 @@ namespace prometheus {
   };
 
   template<int N>
-  class BaseHistogram {
+  class BaseHistogram : public impl::AMetric {
     typedef std::array<std::string, N+1> stringarray;
   protected:
     BaseHistogram(std::string const& name, std::vector<double> const& levels, stringarray const& labels) :
@@ -151,7 +199,7 @@ namespace prometheus {
     }
 
   public:
-    void output(std::ostream& os) const {
+    virtual void output(std::ostream& os) const {
       counters_.output(os);
     }
 
@@ -161,7 +209,7 @@ namespace prometheus {
     bool last_level_is_inf_;
   };
 
-  template<int N, typename T = std::string>
+  template<unsigned long N, typename T = std::string>
   std::array<T, N+1> extend_array(std::array<T, N> const& ar, T const& v) {
     std::array<T, N+1> ret;
     std::copy(ar.begin(), ar.end(), ret.begin());
