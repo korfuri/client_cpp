@@ -58,6 +58,8 @@ namespace prometheus {
       std::vector<AMetric*> metrics_;
     };
 
+    extern Registry global_registry;
+
     class AMetric {
     public:
       AMetric();
