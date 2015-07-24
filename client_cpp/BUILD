@@ -6,11 +6,11 @@ cc_library(
 
 cc_binary(
     name = "client_cpp",
-    srcs = ["main.cc"],
+    srcs = ["client_cpp_main.cc"],
     deps = [":client_cpp_lib"])
 
 cc_test(
     name = "client_cpp_test",
-    srcs = ["test_client_cpp.cc"],
+    srcs = ["client_cpp_test.cc"],
     deps = [":client_cpp_lib",
             "@gtest//gtest:gtest"])
