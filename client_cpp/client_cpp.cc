@@ -5,25 +5,9 @@
 namespace prometheus {
 namespace impl {
 
-Registry global_registry;
+AbstractMetric::AbstractMetric() : AbstractMetric(&global_registry) {}
 
-void Registry::register_metric(AMetric* metric) { metrics_.push_back(metric); }
-
-void Registry::output(std::ostream& os) const {
-  OutputFormatter f(os);
-  for (auto const m : metrics_) {
-    m->output(f);
-  }
-}
-
-OutputFormatter::OutputFormatter(std::ostream& os) : os_(os) {}
-
-AMetric::AMetric() : AMetric(&global_registry) {}
-
-AMetric::AMetric(Registry* reg) { reg->register_metric(this); }
-
-const std::string Counter::type_ = "counter";
-const std::string Gauge::type_ = "gauge";
+AbstractMetric::AbstractMetric(Registry* reg) { reg->register_metric(this); }
 
 } /* namespace impl */
 } /* namespace prometheus */

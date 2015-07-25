@@ -1,188 +1,33 @@
-#ifndef PROMETHEUS_CLIENT_HH__
-#define PROMETHEUS_CLIENT_HH__
+#ifndef PROMETHEUS_CLIENT_CPP_HH__
+#define PROMETHEUS_CLIENT_CPP_HH__
 
-#include "arrayhash.hh"
-#include "zipiterator.hh"
-
-#include <algorithm>
-#include <array>
-#include <atomic>
-#include <mutex>
-#include <ostream>
-#include <string>
-#include <type_traits>
-#include <unordered_map>
-#include <vector>
+#include "metrics.hh"
+#include "registry.hh"
+#include "output_formatter.hh"
+#include "values.hh"
 
 namespace prometheus {
 
-namespace impl {
-
-class AMetric;
-
-class OutputFormatter {
- public:
-  OutputFormatter(std::ostream& os);
-
-  void addMetric(std::string const& name, std::string const& type) {
-    os_ << "# HELP " << name << std::endl;  // TODO(korfuri): Add description.
-    os_ << "# TYPE " << name << ' ' << type << std::endl;
-  }
-
-  void addMetricValue(std::string const& name, double value) {
-    os_ << name << " = " << value << std::endl;
-  }
-
-  template <typename LabelIterator>
-  void addMetricLabelRow(std::string const& name,
-                         LabelIterator const& labels_begin,
-                         LabelIterator const& labels_end, double value) {
-    if (labels_begin == labels_end) {
-      os_ << name << " = " << value << std::endl;
-    } else {
-      os_ << name;
-      char nextchar = '{';
-      for (auto it = labels_begin; it != labels_end; ++it) {
-        os_ << nextchar << (*it).first << '=' << (*it).second;
-        nextchar = ',';
-      }
-      os_ << "} = " << value << std::endl;
-    }
-  }
-
- private:
-  std::ostream& os_;
-};
-
-class Registry {
- public:
-  void register_metric(AMetric* metric);
-  void output(std::ostream& os) const;
-
- private:
-  std::vector<AMetric*> metrics_;
-};
-
-extern Registry global_registry;
-
-class AMetric {
- public:
-  AMetric();
-  AMetric(Registry* reg);
-  virtual void output(OutputFormatter&) const = 0;
-};
-
-template <int N, class MetricType>
-class LabeledMetric : public AMetric {
-  typedef std::array<std::string, N> stringarray;
-
- public:
-  LabeledMetric(std::string const& name, stringarray const& labelnames)
-      : name_(name), labelnames_(labelnames) {
-    static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
-  }
-
-  MetricType& labels(stringarray const& labelvalues) {
-    std::unique_lock<std::mutex> l(mutex_);
-    return values_[labelvalues];
-  }
-
-  void value_output(OutputFormatter& f) const {
-    std::unique_lock<std::mutex> l(mutex_);
-    for (const auto& it_v : values_) {
-      auto zbegin = zip_iterators(labelnames_.begin(), it_v.first.begin());
-      auto zend = zip_iterators(labelnames_.end(), it_v.first.end());
-      f.addMetricLabelRow(name_, zbegin, zend, it_v.second.value());
-    }
-  }
-
-  virtual void output(OutputFormatter& f) const {
-    f.addMetric(name_, MetricType::type_);
-    value_output(f);
-  }
-
- private:
-  const std::string name_;
-  stringarray const labelnames_;
-  mutable std::mutex mutex_;
-  std::unordered_map<stringarray, MetricType, ContainerHash<stringarray>,
-                     ContainerEq<stringarray>> values_;
-};
-
-template <class MetricType>
-class UnlabeledMetric : public AMetric, public MetricType {
- public:
-  UnlabeledMetric(std::string const& name) : name_(name) {}
-
-  virtual void output(OutputFormatter& f) const {
-    f.addMetric(name_, MetricType::type_);
-    f.addMetricValue(name_, this->value_);
-  }
-
- private:
-  std::string const name_;
-};
-
-class BaseScalarMetric {
- public:
-  BaseScalarMetric() {}
-  ~BaseScalarMetric() {}
-
-  double value() const { return value_.load(std::memory_order_relaxed); }
-
- private:
-  BaseScalarMetric(BaseScalarMetric const&) = delete;
-  BaseScalarMetric(BaseScalarMetric&) = delete;
-  BaseScalarMetric& operator=(BaseScalarMetric const&) = delete;
-  BaseScalarMetric& operator=(BaseScalarMetric&&) = delete;
-
- protected:
-  std::atomic<double> value_;
-};
-
-class Gauge : public BaseScalarMetric {
- public:
-  void set(double value) { value_.store(value, std::memory_order_relaxed); }
-
-  const static std::string type_;
-};
-
-class Counter : public BaseScalarMetric {
- public:
-  void inc(double value = 1.0) {
-    // if (value < 0) throw Something();
-    double oldv, newv;
-    do {
-      oldv = value_.load(std::memory_order_acquire);
-      newv = oldv + value;
-    } while (value_.exchange(newv) != oldv);
-  }
-
-  const static std::string type_;
-};
-
-} /* namespace impl */
-
 template <int N>
-class Gauge : public impl::LabeledMetric<N, impl::Gauge> {
-  using impl::LabeledMetric<N, impl::Gauge>::LabeledMetric;
+class Gauge : public impl::LabeledMetric<N, impl::GaugeValue> {
+  using impl::LabeledMetric<N, impl::GaugeValue>::LabeledMetric;
 };
 template <>
-class Gauge<0> : public impl::UnlabeledMetric<impl::Gauge> {
-  using impl::UnlabeledMetric<impl::Gauge>::UnlabeledMetric;
+class Gauge<0> : public impl::UnlabeledMetric<impl::GaugeValue> {
+  using impl::UnlabeledMetric<impl::GaugeValue>::UnlabeledMetric;
 };
 
 template <int N>
-class Counter : public impl::LabeledMetric<N, impl::Counter> {
-  using impl::LabeledMetric<N, impl::Counter>::LabeledMetric;
+class Counter : public impl::LabeledMetric<N, impl::CounterValue> {
+  using impl::LabeledMetric<N, impl::CounterValue>::LabeledMetric;
 };
 template <>
-class Counter<0> : public impl::UnlabeledMetric<impl::Counter> {
-  using impl::UnlabeledMetric<impl::Counter>::UnlabeledMetric;
+class Counter<0> : public impl::UnlabeledMetric<impl::CounterValue> {
+  using impl::UnlabeledMetric<impl::CounterValue>::UnlabeledMetric;
 };
 
 template <int N>
-class BaseHistogram : public impl::AMetric {
+class BaseHistogram : public impl::AbstractMetric {
   typedef std::array<std::string, N + 1> stringarray;
 
  protected:

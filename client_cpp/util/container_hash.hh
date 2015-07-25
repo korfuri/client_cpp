@@ -4,6 +4,9 @@
 #include <functional>
 #include <type_traits>
 
+namespace prometheus {
+namespace util {
+
 template <class Container, template <class> class ItemHash = std::hash>
 struct ContainerHash {
   typedef Container argument_type;
@@ -33,5 +36,8 @@ struct ContainerEq {
     return itr == rhs.end();
   }
 };
+
+}
+}
 
 #endif /* PROMETHEUS_ARRAYHASH_HH__ */
