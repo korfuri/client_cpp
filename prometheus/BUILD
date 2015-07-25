@@ -39,6 +39,14 @@ cc_test(
         "@gtest//gtest:gtest",
     ])
 
+cc_test(
+    name = "client_concurrent_test",
+    srcs = ["client_concurrent_test.cc"],
+    deps = [
+        ":client_lib",
+        "@gtest//gtest:gtest",
+    ])
+
 sh_test(
     name = "client_integration_test",
     srcs = ["client_integration_test.sh"],
