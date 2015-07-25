@@ -3,14 +3,19 @@ package(
 
 cc_library(
     name = "client_lib",
+    srcs = ["client.cc"],
+    hdrs = ["client.hh"],
+    deps = [":client_lib_impl"],
+    visibility = ["//visibility:public"])
+
+cc_library(
+    name = "client_lib_impl",
     srcs = [
-        "client.cc",
         "output_formatter.cc",
         "registry.cc",
         "values.cc",
     ],
     hdrs = [
-        "client.hh",
         "output_formatter.hh",
         "metrics.hh",
         "registry.hh",
@@ -19,8 +24,7 @@ cc_library(
     deps = [
         "//prometheus/util:zipped_iterator_lib",
         "//prometheus/util:container_hash_lib",
-    ],
-    visibility = ["//visibility:public"])
+    ])
 
 cc_binary(
     name = "client_demo",
