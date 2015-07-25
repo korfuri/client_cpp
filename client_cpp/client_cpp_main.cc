@@ -12,10 +12,12 @@ int main() {
   blops_by_blarg.labels({{"grunt"}}).set(1.3);
   blops_by_blarg.labels({{"blub"}}).set(8.6);
 
-  Gauge<2> blops_by_blarg_blurg("blops_by_blarg_blurg_total", {"blarg", "blurg"});
+  Gauge<2> blops_by_blarg_blurg("blops_by_blarg_blurg_total",
+                                {"blarg", "blurg"});
   blops_by_blarg_blurg.labels({"grunt", "knix"}).set(1.3);
   blops_by_blarg_blurg.labels({"blub", "knix"}).set(8.6);
-  blops_by_blarg_blurg.labels(std::array<std::string, 2>({"grunt", "knux"})).set(1.5);
+  blops_by_blarg_blurg.labels(std::array<std::string, 2>({"grunt", "knux"}))
+      .set(1.5);
   blops_by_blarg_blurg.labels({"blub", "knux"}).set(8.2);
 
   Counter<0> bloops("bloops_total");
@@ -28,7 +30,8 @@ int main() {
   blups.add(10);
   blups.add(10000000);
 
-  Histogram<2> blups_by_blip_blop("blups_by_blip_blop", {0, 1, 10, 100, 1000, 10000}, {"blip", "blop"});
+  Histogram<2> blups_by_blip_blop(
+      "blups_by_blip_blop", {0, 1, 10, 100, 1000, 10000}, {"blip", "blop"});
   blups_by_blip_blop.add(.5, {"a", "b"});
   blups_by_blip_blop.add(5, {"a", "b"});
   blups_by_blip_blop.add(10, {"a", "c"});

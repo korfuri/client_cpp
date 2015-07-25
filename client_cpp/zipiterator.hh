@@ -1,14 +1,13 @@
 #ifndef PROMETHEUS_ZIPITERATOR_HH__
-# define PROMETHEUS_ZIPITERATOR_HH__
+#define PROMETHEUS_ZIPITERATOR_HH__
 
-# include <functional>
-# include <utility>
+#include <functional>
+#include <utility>
 
-template<typename Tl, typename Tr>
+template <typename Tl, typename Tr>
 class ZippedIterator {
-public:
-  ZippedIterator(Tl const& l, Tr const& r) :
-    l_(l), r_(r) {}
+ public:
+  ZippedIterator(Tl const& l, Tr const& r) : l_(l), r_(r) {}
 
   ZippedIterator& operator++() {
     ++l_;
@@ -22,14 +21,10 @@ public:
   // left and right iterators.
   typedef decltype(std::make_pair(std::ref(*(Tl())), std::ref(*(Tr())))) pair;
 
-  pair operator*() {
-    return std::make_pair(std::ref(*l_),
-			  std::ref(*r_));
-  }
+  pair operator*() { return std::make_pair(std::ref(*l_), std::ref(*r_)); }
 
   pair operator*() const {
-    return std::make_pair(std::ref(*l_),
-			  std::ref(*r_));
+    return std::make_pair(std::ref(*l_), std::ref(*r_));
   }
 
   bool operator==(ZippedIterator const& rhs) const {
@@ -42,16 +37,14 @@ public:
     return (l_ == rhs.l_) || (r_ == rhs.r_);
   }
 
-  bool operator!=(ZippedIterator const& rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(ZippedIterator const& rhs) const { return !(*this == rhs); }
 
-private:
+ private:
   Tl l_;
   Tr r_;
 };
 
-template<typename Tl, typename Tr>
+template <typename Tl, typename Tr>
 ZippedIterator<Tl, Tr> zip_iterators(Tl const& l, Tr const& r) {
   return ZippedIterator<Tl, Tr>(l, r);
 }
