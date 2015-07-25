@@ -1,9 +1,13 @@
+package(
+    default_visibility = ["//visibility:private"])
+
 cc_library(
     name = "client_cpp_lib",
     srcs = ["client_cpp.cc"],
     hdrs = ["client_cpp.hh",
             "arrayhash.hh",
-	    "zipiterator.hh"])
+	    "zipiterator.hh"],
+    visibility = ["//visibility:public"])
 
 cc_binary(
     name = "client_cpp",
