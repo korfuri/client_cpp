@@ -6,9 +6,9 @@ OUT="$(mktemp -p "${TEST_TMPDIR?}")"
 SORTED_OUT="$(mktemp -p "${TEST_TMPDIR?}")"
 SORTED_REF="$(mktemp -p "${TEST_TMPDIR?}")"
 
-REF="client_cpp/testdata/ref.txt"
+REF="prometheus/testdata/ref.txt"
 
-client_cpp/client_cpp > "${OUT?}"
+prometheus/client_demo > "${OUT?}"
 sort "${OUT?}" > "${SORTED_OUT?}"
 sort "${REF?}" > "${SORTED_REF?}"
 
