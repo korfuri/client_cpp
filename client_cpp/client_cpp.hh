@@ -2,6 +2,7 @@
 # define PROMETHEUS_CLIENT_HH__
 
 # include "arrayhash.hh"
+# include "zipiterator.hh"
 
 # include <algorithm>
 # include <array>
@@ -25,21 +26,27 @@ namespace prometheus {
 
       void addMetric(std::string const& name,
 		     std::string const& type) {
-	os_ << "# TYPE " << type << std::endl;
+	os_ << "# HELP " << name << std::endl;  // TODO(korfuri): Add description.
+	os_ << "# TYPE " << name << ' ' << type << std::endl;
+      }
+
+      void addMetricValue(std::string const& name,
+			  double value) {
+	os_ << name << " = " << value << std::endl;
       }
 
       template<typename LabelIterator>
-      void addMetricRow(std::string const& name,
-			LabelIterator const& labels_begin,
-			LabelIterator const& labels_end,
-			double value) {
+      void addMetricLabelRow(std::string const& name,
+			     LabelIterator const& labels_begin,
+			     LabelIterator const& labels_end,
+			     double value) {
 	if (labels_begin == labels_end) {
 	  os_ << name << " = " << value << std::endl;
 	} else {
 	  os_ << name;
 	  char nextchar = '{';
 	  for (auto it = labels_begin; it != labels_end; ++it) {
-	    os_ << nextchar << it->first << '=' << it->second;
+	    os_ << nextchar << (*it).first << '=' << (*it).second;
 	    nextchar = ',';
 	  }
 	  os_ << "} = " << value << std::endl;
@@ -64,7 +71,7 @@ namespace prometheus {
     public:
       AMetric();
       AMetric(Registry* reg);
-      virtual void output(std::ostream&) const = 0;
+      virtual void output(OutputFormatter&) const = 0;
     };
 
     template<int N, class MetricType>
@@ -83,22 +90,19 @@ namespace prometheus {
 	return values_[labelvalues];
       }
 
-      virtual void output(std::ostream& os) const {
-	os << "# TYPE gauge" << std::endl;
+      void value_output(OutputFormatter& f) const {
 	std::unique_lock<std::mutex> l(mutex_);
 	for (const auto& it_v : values_) {
-	  os << name_;
-	  char next_separator = '{';
-	  auto labelname_it = labelnames_.begin();
-	  for (const auto& it_l : it_v.first) {
-	    os << next_separator << *labelname_it << "=" << it_l;
-	    ++labelname_it;
-	    next_separator = ',';
-	  }
-	  os << "} = ";
-	  os << it_v.second.value();
-	  os << std::endl;
+
+	  auto zbegin = zip_iterators(labelnames_.begin(), it_v.first.begin());
+	  auto zend = zip_iterators(labelnames_.end(), it_v.first.end());
+	  f.addMetricLabelRow(name_, zbegin, zend, it_v.second.value());
 	}
+      }
+
+      virtual void output(OutputFormatter& f) const {
+	f.addMetric(name_, MetricType::type_);
+	value_output(f);
       }
 
     private:
@@ -113,9 +117,9 @@ namespace prometheus {
     public:
       UnlabeledMetric(std::string const& name) : name_(name) {}
 
-      virtual void output(std::ostream& os) const {
-	os << "# TYPE gauge" << std::endl;
-	os << name_ << " = " << this->value_ << std::endl;
+      virtual void output(OutputFormatter& f) const {
+	f.addMetric(name_, MetricType::type_);
+	f.addMetricValue(name_, this->value_);
       }
 
     private:
@@ -146,6 +150,8 @@ namespace prometheus {
       void set(double value) {
 	value_.store(value, std::memory_order_relaxed);
       }
+
+      const static std::string type_;
     };
 
 
@@ -159,6 +165,8 @@ namespace prometheus {
 	  newv = oldv + value;
 	} while (value_.exchange(newv) != oldv);
       }
+
+      const static std::string type_;
     };
 
   }  /* namespace impl */
@@ -182,6 +190,7 @@ namespace prometheus {
     typedef std::array<std::string, N+1> stringarray;
   protected:
     BaseHistogram(std::string const& name, std::vector<double> const& levels, stringarray const& labels) :
+      name_(name),
       counters_(name, labels),
       levels_(levels.size()),
       last_level_is_inf_(isposinf(levels[levels.size() - 1]))
@@ -201,11 +210,13 @@ namespace prometheus {
     }
 
   public:
-    virtual void output(std::ostream& os) const {
-      counters_.output(os);
+    virtual void output(impl::OutputFormatter& f) const {
+      f.addMetric(name_, "histogram");
+      counters_.value_output(f);
     }
 
   protected:
+    std::string name_;
     Counter<N+1> counters_;
     std::vector<std::pair<double, std::string>> levels_;
     bool last_level_is_inf_;
