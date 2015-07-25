@@ -2,7 +2,8 @@ cc_library(
     name = "client_cpp_lib",
     srcs = ["client_cpp.cc"],
     hdrs = ["client_cpp.hh",
-            "arrayhash.hh"])
+            "arrayhash.hh",
+	    "zipiterator.hh"])
 
 cc_binary(
     name = "client_cpp",
