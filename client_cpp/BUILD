@@ -15,3 +15,10 @@ cc_test(
     srcs = ["client_cpp_test.cc"],
     deps = [":client_cpp_lib",
             "@gtest//gtest:gtest"])
+
+sh_test(
+    name = "client_cpp_integration_test",
+    srcs = ["client_cpp_integration_test.sh"],
+    data = [
+        ":client_cpp",
+        "testdata/ref.txt"])
