@@ -24,9 +24,17 @@ namespace prometheus {
       std::atomic<double> value_;
     };
 
-    class GaugeValue : public BaseScalarValue {
+    class SetGaugeValue : public BaseScalarValue {
      public:
       void set(double value) { value_.store(value, std::memory_order_relaxed); }
+
+      const static std::string type_;
+    };
+
+    class IncDecGaugeValue : public BaseScalarValue {
+     public:
+      void inc(double value = 1.0);
+      void dec(double value = 1.0);
 
       const static std::string type_;
     };

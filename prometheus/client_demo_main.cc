@@ -5,15 +5,15 @@
 using namespace prometheus;
 
 int main() {
-  Gauge<0> blips("blips_total", "Total number of blips.");
+  SetGauge<0> blips("blips_total", "Total number of blips.");
   blips.set(4.2);
 
-  Gauge<1> blops_by_blarg("blops_by_blarg_total",
+  SetGauge<1> blops_by_blarg("blops_by_blarg_total",
                           "Total number of blops for each blarg.", {"blarg"});
   blops_by_blarg.labels({{"grunt"}}).set(1.3);
   blops_by_blarg.labels({{"blub"}}).set(8.6);
 
-  Gauge<2> blops_by_blarg_blurg("blops_by_blarg_blurg_total",
+  SetGauge<2> blops_by_blarg_blurg("blops_by_blarg_blurg_total",
                                 "Total number of blops for each (blarg,blurg).",
                                 {"blarg", "blurg"});
   blops_by_blarg_blurg.labels({"grunt", "knix"}).set(1.3);

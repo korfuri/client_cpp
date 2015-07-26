@@ -15,12 +15,21 @@
 namespace prometheus {
 
   template <int N>
-  class Gauge : public impl::LabeledMetric<N, impl::GaugeValue> {
-    using impl::LabeledMetric<N, impl::GaugeValue>::LabeledMetric;
+  class SetGauge : public impl::LabeledMetric<N, impl::SetGaugeValue> {
+    using impl::LabeledMetric<N, impl::SetGaugeValue>::LabeledMetric;
   };
   template <>
-  class Gauge<0> : public impl::UnlabeledMetric<impl::GaugeValue> {
-    using impl::UnlabeledMetric<impl::GaugeValue>::UnlabeledMetric;
+  class SetGauge<0> : public impl::UnlabeledMetric<impl::SetGaugeValue> {
+    using impl::UnlabeledMetric<impl::SetGaugeValue>::UnlabeledMetric;
+  };
+
+  template <int N>
+  class IncDecGauge : public impl::LabeledMetric<N, impl::IncDecGaugeValue> {
+    using impl::LabeledMetric<N, impl::IncDecGaugeValue>::LabeledMetric;
+  };
+  template <>
+  class IncDecGauge<0> : public impl::UnlabeledMetric<impl::IncDecGaugeValue> {
+    using impl::UnlabeledMetric<impl::IncDecGaugeValue>::UnlabeledMetric;
   };
 
   template <int N>

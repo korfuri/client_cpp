@@ -33,28 +33,54 @@ namespace {
     EXPECT_NO_THROW(c0.inc(0));
   }
 
-  Gauge<0> g0("test_gauge0", "test Gauge<0>");
-  Gauge<1> g1("test_gauge1", "test Gauge<1>", {{"x"}});
-  Gauge<2> g2("test_gauge2", "test Gauge<2>", {"x", "y"});
+  SetGauge<0> sg0("test_set_gauge0", "test SetGauge<0>");
+  SetGauge<1> sg1("test_set_gauge1", "test SetGauge<1>", {{"x"}});
+  SetGauge<2> sg2("test_set_gauge2", "test SetGauge<2>", {"x", "y"});
 
-  TEST_F(ClientCPPTest, GaugeTest) {
-    EXPECT_EQ(0, g0.value());
-    EXPECT_EQ(0, g1.labels({"a"}).value());
-    EXPECT_EQ(0, g2.labels({"a", "a"}).value());
+  TEST_F(ClientCPPTest, SetGaugeTest) {
+    EXPECT_EQ(0, sg0.value());
+    EXPECT_EQ(0, sg1.labels({"a"}).value());
+    EXPECT_EQ(0, sg2.labels({"a", "a"}).value());
 
-    g0.set(4.2);
-    g1.labels({"b"}).set(1.1);
-    g2.labels({"c", "c"}).set(2.4);
-    EXPECT_EQ(4.2, g0.value());
-    EXPECT_EQ(0, g1.labels({"a"}).value());
-    EXPECT_EQ(1.1, g1.labels({"b"}).value());
-    EXPECT_EQ(0, g2.labels({"a", "a"}).value());
-    EXPECT_EQ(0, g2.labels({"a", "c"}).value());
-    EXPECT_EQ(0, g2.labels({"c", "a"}).value());
-    EXPECT_EQ(2.4, g2.labels({"c", "c"}).value());
+    sg0.set(4.2);
+    sg1.labels({"b"}).set(1.1);
+    sg2.labels({"c", "c"}).set(2.4);
+    EXPECT_EQ(4.2, sg0.value());
+    EXPECT_EQ(0, sg1.labels({"a"}).value());
+    EXPECT_EQ(1.1, sg1.labels({"b"}).value());
+    EXPECT_EQ(0, sg2.labels({"a", "a"}).value());
+    EXPECT_EQ(0, sg2.labels({"a", "c"}).value());
+    EXPECT_EQ(0, sg2.labels({"c", "a"}).value());
+    EXPECT_EQ(2.4, sg2.labels({"c", "c"}).value());
 
-    g0.set(-1.2);
-    EXPECT_EQ(-1.2, g0.value());
+    sg0.set(-1.2);
+    EXPECT_EQ(-1.2, sg0.value());
+  }
+
+  IncDecGauge<0> idg0("test_incdec_gauge0", "test IncDecGauge<0>");
+  IncDecGauge<1> idg1("test_incdec_gauge1", "test IncDecGauge<1>", {{"x"}});
+  IncDecGauge<2> idg2("test_incdec_gauge2", "test IncDecGauge<2>", {"x", "y"});
+
+  TEST_F(ClientCPPTest, IncdecGaugeTest) {
+    EXPECT_EQ(0, idg0.value());
+    EXPECT_EQ(0, idg1.labels({"a"}).value());
+    EXPECT_EQ(0, idg2.labels({"a", "a"}).value());
+
+    idg0.inc(4.2);
+    idg1.labels({"b"}).inc(1.1);
+    idg2.labels({"c", "c"}).inc(2.4);
+    EXPECT_EQ(4.2, idg0.value());
+    EXPECT_EQ(0, idg1.labels({"a"}).value());
+    EXPECT_EQ(1.1, idg1.labels({"b"}).value());
+    EXPECT_EQ(0, idg2.labels({"a", "a"}).value());
+    EXPECT_EQ(0, idg2.labels({"a", "c"}).value());
+    EXPECT_EQ(0, idg2.labels({"c", "a"}).value());
+    EXPECT_EQ(2.4, idg2.labels({"c", "c"}).value());
+
+    idg0.inc(-1.2);
+    EXPECT_EQ(3, idg0.value());
+    idg0.dec(0.5);
+    EXPECT_EQ(2.5, idg0.value());
   }
 
   Histogram<0> h0("test_histogram0", "test Histogram<0>");

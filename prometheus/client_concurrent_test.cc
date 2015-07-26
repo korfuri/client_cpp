@@ -36,31 +36,62 @@ namespace {
     EXPECT_EQ(kThreads * kIterations / 2, c1.labels({{"1"}}).value());
   }
 
-  Gauge<0> g0("test_gauge0", "Test Gauge<0>.");
-  Gauge<1> g1("test_gauge1", "Test Gauge<1>.", {{"even"}});
+  SetGauge<0> sg0("test_set_gauge0", "Test SetGauge<0>.");
+  SetGauge<1> sg1("test_set_gauge1", "Test SetGauge<1>.", {{"even"}});
 
-  void f_gaugetest(int threadid) {
-    g0.set(threadid);
-    g1.labels({{std::to_string(bool(threadid % 2))}}).set(threadid);
+  void f_setgaugetest(int threadid) {
+    sg0.set(threadid);
+    sg1.labels({{std::to_string(bool(threadid % 2))}}).set(threadid);
   }
 
-  TEST_F(ClientConcurrentTest, GaugeTest) {
+  TEST_F(ClientConcurrentTest, SetGaugeTest) {
     std::list<std::thread> l;
     for (int i = 0; i < kThreads; ++i) {
-      l.push_back(std::thread(f_gaugetest, i));
+      l.push_back(std::thread(f_setgaugetest, i));
     }
     for (auto &t : l) {
       t.join();
     }
-    EXPECT_TRUE(g0.value() >= 0 && g0.value() < kThreads);
-    double g1_even = g1.labels({{"0"}}).value();
+    EXPECT_TRUE(sg0.value() >= 0 && sg0.value() < kThreads);
+    double g1_even = sg1.labels({{"0"}}).value();
     EXPECT_TRUE(g1_even >= 0);
     EXPECT_TRUE(g1_even < kThreads);
     EXPECT_EQ(0, (int)g1_even % 2);
-    double g1_odd = g1.labels({{"1"}}).value();
+    double g1_odd = sg1.labels({{"1"}}).value();
     EXPECT_TRUE(g1_odd >= 0);
     EXPECT_TRUE(g1_odd < kThreads);
     EXPECT_EQ(1, (int)g1_odd % 2);
+  }
+
+  IncDecGauge<0> idg0("test_set_gauge0", "Test SetGauge<0>.");
+  IncDecGauge<0> idg0a("test_set_gauge0a", "Test SetGauge<0>.");
+  IncDecGauge<1> idg1("test_set_gauge1", "Test SetGauge<1>.", {"threadid"});
+
+  void f_incdecgaugetest(int threadid) {
+    std::string id = std::to_string(threadid);
+    for (int i = 0; i < kIterations; ++i) {
+      idg0.inc(threadid);
+      idg0a.inc();
+      idg1.labels({id}).inc();
+      idg0.dec(threadid);
+      idg1.labels({id}).dec();
+    }
+  }
+
+  TEST_F(ClientConcurrentTest, IncDecGaugeTest) {
+    std::list<std::thread> l;
+    for (int i = 0; i < kThreads; ++i) {
+      EXPECT_EQ(0, idg1.labels({std::to_string(i)}).value());
+      l.push_back(std::thread(f_incdecgaugetest, i));
+    }
+    for (auto &t : l) {
+      t.join();
+    }
+    EXPECT_EQ(0, idg0.value());
+    EXPECT_EQ(kThreads * kIterations, idg0a.value());
+    for (int i = 0; i < kThreads; ++i) {
+      EXPECT_EQ(0, idg1.labels({std::to_string(i)}).value());
+    }
   }
 }
 

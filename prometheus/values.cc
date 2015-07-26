@@ -4,6 +4,16 @@
 namespace prometheus {
   namespace impl {
 
+    void IncDecGaugeValue::inc(double value) {
+      double current = value_.load();
+      while (!(value_.compare_exchange_weak(current, current + value)))
+        ;
+    }
+
+    void IncDecGaugeValue::dec(double value) {
+      inc(-value);
+    }
+
     void CounterValue::inc(double value) {
       if (value < 0) {
         throw err::NegativeCounterIncrementException();
@@ -20,7 +30,8 @@ namespace prometheus {
     }
 
     const std::string CounterValue::type_ = "counter";
-    const std::string GaugeValue::type_ = "gauge";
+    const std::string SetGaugeValue::type_ = "gauge";
+    const std::string IncDecGaugeValue::type_ = "gauge";
     const std::string HistogramValue::type_ = "histogram";
   }
 }
