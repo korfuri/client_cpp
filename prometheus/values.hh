@@ -9,7 +9,7 @@ namespace impl {
 
 class BaseScalarValue {
  public:
-  BaseScalarValue() {}
+  BaseScalarValue() : value_(0) {}
   ~BaseScalarValue() {}
 
   double value() const { return value_.load(std::memory_order_relaxed); }
