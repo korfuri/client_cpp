@@ -36,7 +36,6 @@ struct ContainerEq {
     return itr == rhs.end();
   }
 };
-
 }
 }
 

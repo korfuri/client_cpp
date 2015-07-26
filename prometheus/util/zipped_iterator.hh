@@ -51,7 +51,6 @@ template <typename Tl, typename Tr>
 ZippedIterator<Tl, Tr> zip_iterators(Tl const& l, Tr const& r) {
   return ZippedIterator<Tl, Tr>(l, r);
 }
-
 }
 }
 

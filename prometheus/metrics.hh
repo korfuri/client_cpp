@@ -43,7 +43,8 @@ class LabeledMetric : public AbstractMetric {
   void value_output(OutputFormatter& f) const {
     std::unique_lock<std::mutex> l(mutex_);
     for (const auto& it_v : values_) {
-      auto zbegin = util::zip_iterators(labelnames_.begin(), it_v.first.begin());
+      auto zbegin =
+          util::zip_iterators(labelnames_.begin(), it_v.first.begin());
       auto zend = util::zip_iterators(labelnames_.end(), it_v.first.end());
       f.addMetricLabelRow(name_, zbegin, zend, it_v.second.value());
     }

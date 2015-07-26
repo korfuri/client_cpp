@@ -62,7 +62,6 @@ TEST_F(ClientConcurrentTest, GaugeTest) {
   EXPECT_TRUE(g1_odd < kThreads);
   EXPECT_EQ(1, (int)g1_odd % 2);
 }
-
 }
 
 int main(int argc, char** argv) {
