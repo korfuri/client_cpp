@@ -38,7 +38,9 @@ cc_test(
     deps = [
         ":client_lib",
         "@gtest//gtest:gtest",
-    ])
+    ],
+    size = "small",
+    timeout = "short")
 
 cc_test(
     name = "client_concurrent_test",
@@ -46,7 +48,8 @@ cc_test(
     deps = [
         ":client_lib",
         "@gtest//gtest:gtest",
-    ])
+    ],
+    size = "small")
 
 sh_test(
     name = "client_integration_test",
@@ -54,4 +57,6 @@ sh_test(
     data = [
         ":client_demo",
         "testdata/ref.txt",
-    ])
+    ],
+    size = "small",
+    timeout = "short")
