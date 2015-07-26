@@ -38,6 +38,13 @@ class CounterValue : public BaseScalarValue {
   const static std::string type_;
 };
 
+class HistogramValue : public BaseScalarValue {
+ public:
+  void inc();
+
+  const static std::string type_;
+};
+
 } /* namespace impl */
 } /* namespace prometheus */
 

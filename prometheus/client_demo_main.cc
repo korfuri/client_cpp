@@ -26,20 +26,19 @@ int main() {
   bloops.inc(4.2);
   bloops.inc();
 
-  Histogram<0> blups("blups", "Distribution of blups.",
-                     {0, 1, 10, 100, 1000, 10000});
-  blups.add(.5);
-  blups.add(5);
-  blups.add(10);
-  blups.add(10000000);
+  Histogram<0> blups("blups", "Distribution of blups.");
+  blups.record(.5);
+  blups.record(5);
+  blups.record(10);
+  blups.record(10000000);
 
   Histogram<2> blups_by_blip_blop(
       "blups_by_blip_blop", "Distribution of blups by blip and blop.",
-      {0, 1, 10, 100, 1000, 10000}, {"blip", "blop"});
-  blups_by_blip_blop.add(.5, {"a", "b"});
-  blups_by_blip_blop.add(5, {"a", "b"});
-  blups_by_blip_blop.add(10, {"a", "c"});
-  blups_by_blip_blop.add(10000000, {"e", "d"});
+      {"blip", "blop"}, {0, 1, 10, 100, 1000, 10000});
+  blups_by_blip_blop.record(.5, {"a", "b"});
+  blups_by_blip_blop.record(5, {"a", "b"});
+  blups_by_blip_blop.record(10, {"a", "c"});
+  blups_by_blip_blop.record(10000000, {"e", "d"});
 
   prometheus::impl::global_registry.output(std::cout);
 

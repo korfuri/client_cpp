@@ -7,6 +7,10 @@
 #include "util/extend_array.hh"
 #include "values.hh"
 
+#include <array>
+#include <string>
+#include <vector>
+
 namespace prometheus {
 
 template <int N>
@@ -27,20 +31,33 @@ class Counter<0> : public impl::UnlabeledMetric<impl::CounterValue> {
   using impl::UnlabeledMetric<impl::CounterValue>::UnlabeledMetric;
 };
 
+extern const std::vector<double> default_histogram_levels;
+
+// Always equal to std::numeric_limits<double>::infinity().
+// Provided only for convenience.
+extern const double kInf;
+
+extern const std::string kInfStr;
+
 template <int N>
-class BaseHistogram : public impl::AbstractMetric {
+class BaseHistogram : public impl::LabeledMetric<N + 1, impl::HistogramValue> {
   typedef std::array<std::string, N + 1> stringarray;
 
  protected:
   BaseHistogram(std::string const& name, std::string const& help,
                 std::vector<double> const& levels, stringarray const& labels)
-      : AbstractMetric(name, help),
-        counters_(name, help, labels),
-        levels_(levels.size()),
-        last_level_is_inf_(isposinf(levels[levels.size() - 1])) {
-    std::transform(levels.begin(), levels.end(), levels_.begin(), [](double d) {
-      return std::make_pair(d, double_to_string(d));
-    });
+      : impl::LabeledMetric<N + 1, impl::HistogramValue>(name, help, labels) {
+    double last_level = std::numeric_limits<double>::min();
+    for (auto const& l : levels) {
+      // TODO(korfuri): if (l <= last_level) throw Something();
+      levels_.push_back(std::make_pair(l, double_to_string(l)));
+      last_level = l;
+    }
+
+    // Appends a +Inf level if there wasn't one.
+    if (!isposinf(last_level)) {
+      levels_.push_back(std::make_pair(kInf, kInfStr));
+    }
   }
 
   static bool isposinf(double d) { return std::isinf(d) && d > 0; }
@@ -48,21 +65,36 @@ class BaseHistogram : public impl::AbstractMetric {
   static std::string double_to_string(double d) {
     // TODO(korfuri): Is this needed?
     if (isposinf(d)) {
-      return "+Inf";
+      return kInfStr;
     }
+    // TODO(korfuri): Try to have a friendlier formatting, 1.0 is
+    // formatted as "1.0000000" with (my system's) std::to_string.
     return std::to_string(d);
   }
 
- public:
-  virtual void output(impl::OutputFormatter& f) const {
-    f.addMetric(name_, help_, "histogram");
-    counters_.value_output(f);
+  std::string level_up(double v) {
+    // Returns the first level that contains a value v. This is
+    // useful for testing, if you want to check that a certain value
+    // is present. You can do:
+    //  Histogram<0> h("h", "h");
+    //  h.add(4.2);
+    //  double x = h.labels({h.level_up(4.2)}).value();
+    //  assert(x == 1.0);
+    for (auto it = levels_.begin(); it != levels_.end(); ++it) {
+      if (it->first < v) {
+        ++it;
+        if (it == levels_.end()) {
+          return kInfStr;
+        } else {
+          return it->second;
+        }
+      }
+      return kInfStr;
+    }
   }
 
  protected:
-  Counter<N + 1> counters_;
   std::vector<std::pair<double, std::string>> levels_;
-  bool last_level_is_inf_;
 };
 
 template <int N>
@@ -71,20 +103,17 @@ class Histogram : public BaseHistogram<N> {
 
  public:
   Histogram(std::string const& name, std::string const& help,
-            std::vector<double> const& levels, stringarray const& labels)
+            stringarray const& labels,
+            std::vector<double> const& levels = default_histogram_levels)
       : BaseHistogram<N>(name, help, levels,
                          util::extend_array(labels, std::string("le"))) {}
 
-  void add(double value, stringarray const& labels) {
+  void record(double value, stringarray const& labels) {
     for (auto const& lvl : this->levels_) {
-      if (value > lvl.first) {
-        this->counters_.labels(util::extend_array<N, std::string>(
-                                   labels, lvl.second)).inc();
+      if (value <= lvl.first) {
+        this->labels(util::extend_array<N, std::string>(labels, lvl.second))
+            .inc();
       }
-    }
-    if (!this->last_level_is_inf_) {
-      this->counters_.labels(util::extend_array<N, std::string>(labels, "+Inf"))
-          .inc();
     }
   }
 };
@@ -93,17 +122,14 @@ template <>
 class Histogram<0> : public BaseHistogram<0> {
  public:
   Histogram(std::string const& name, std::string const& help,
-            std::vector<double> const& levels)
+            std::vector<double> const& levels = default_histogram_levels)
       : BaseHistogram<0>(name, help, levels, {{"le"}}) {}
 
-  void add(double value) {
+  void record(double value) {
     for (auto const& lvl : levels_) {
-      if (value > lvl.first) {
-        counters_.labels({{lvl.second}}).inc();
+      if (value <= lvl.first) {
+        this->labels({{lvl.second}}).inc();
       }
-    }
-    if (!last_level_is_inf_) {
-      counters_.labels({{"+Inf"}}).inc();
     }
   }
 };

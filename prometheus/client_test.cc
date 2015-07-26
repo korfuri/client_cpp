@@ -55,7 +55,24 @@ TEST_F(ClientCPPTest, GaugeTest) {
   EXPECT_EQ(-1.2, g0.value());
 }
 
-// TODO(korfuri): Test histograms.
+Histogram<0> h0("test_histogram0", "test Histogram<0>");
+Histogram<0> h0a("test_histogram0a", "test Histogram<0> with custom levels",
+                 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, kInf});
+Histogram<0> h0b("test_histogram0b",
+                 "test Histogram<0> with custom levels without infinity",
+                 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+Histogram<1> h1("test_histogram1", "test Histogram<1>", {{"x"}});
+
+TEST_F(ClientCPPTest, HistogramTest) {
+  h0.record(1.5);
+  h0.record(7.5);
+  h0a.record(1.5);
+  h0a.record(7.5);
+  h0b.record(1.5);
+  h0b.record(7.5);
+
+  EXPECT_EQ(0, h0.labels({"0.050000"}).value());
+}
 
 } /* namespace */
 
