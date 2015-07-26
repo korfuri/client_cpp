@@ -4,16 +4,16 @@
 #include <array>
 
 namespace prometheus {
-namespace util {
+  namespace util {
 
-template <unsigned long N, typename T = std::string>
-std::array<T, N + 1> extend_array(std::array<T, N> const& ar, T const& v) {
-  std::array<T, N + 1> ret;
-  std::copy(ar.begin(), ar.end(), ret.begin());
-  ret[ret.size() - 1] = v;
-  return ret;
-}
-}
+    template <unsigned long N, typename T = std::string>
+    std::array<T, N + 1> extend_array(std::array<T, N> const &ar, T const &v) {
+      std::array<T, N + 1> ret;
+      std::copy(ar.begin(), ar.end(), ret.begin());
+      ret[ret.size() - 1] = v;
+      return ret;
+    }
+  }
 }
 
 #endif
