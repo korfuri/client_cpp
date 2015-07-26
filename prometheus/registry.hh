@@ -4,6 +4,7 @@
 #include "metrics.hh"
 
 #include <ostream>
+#include <mutex>
 #include <vector>
 
 namespace prometheus {
@@ -16,6 +17,7 @@ class Registry {
 
  private:
   std::vector<AbstractMetric*> metrics_;
+  mutable std::mutex mutex_;
 };
 
 extern Registry global_registry;
