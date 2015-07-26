@@ -4,12 +4,8 @@ namespace prometheus {
 namespace impl {
 
 void CounterValue::inc(double value) {
-  // if (value < 0) throw Something();
-  double oldv, newv;
-  do {
-    oldv = value_.load(std::memory_order_acquire);
-    newv = oldv + value;
-  } while (value_.exchange(newv) != oldv);
+  double current = value_.load();
+  while (!(value_.compare_exchange_weak(current, current + value)));
 }
  
 const std::string CounterValue::type_ = "counter";
