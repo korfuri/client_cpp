@@ -37,7 +37,11 @@ extern const std::vector<double> default_histogram_levels;
 // Provided only for convenience.
 extern const double kInf;
 
+// Use "+Inf" and "-Inf" to look like Go's extrema.
 extern const std::string kInfStr;
+extern const std::string kNegInfStr;
+
+std::string double_to_string(double d);
 
 template <int N>
 class BaseHistogram : public impl::LabeledMetric<N + 1, impl::HistogramValue> {
@@ -55,21 +59,9 @@ class BaseHistogram : public impl::LabeledMetric<N + 1, impl::HistogramValue> {
     }
 
     // Appends a +Inf level if there wasn't one.
-    if (!isposinf(last_level)) {
+    if (!std::isinf(last_level) || last_level < 0) {
       levels_.push_back(std::make_pair(kInf, kInfStr));
     }
-  }
-
-  static bool isposinf(double d) { return std::isinf(d) && d > 0; }
-
-  static std::string double_to_string(double d) {
-    // TODO(korfuri): Is this needed?
-    if (isposinf(d)) {
-      return kInfStr;
-    }
-    // TODO(korfuri): Try to have a friendlier formatting, 1.0 is
-    // formatted as "1.0000000" with (my system's) std::to_string.
-    return std::to_string(d);
   }
 
   std::string level_up(double v) {
