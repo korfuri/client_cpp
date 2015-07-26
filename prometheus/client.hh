@@ -1,6 +1,7 @@
 #ifndef PROMETHEUS_CLIENT_CPP_HH__
 #define PROMETHEUS_CLIENT_CPP_HH__
 
+#include "exceptions.hh"
 #include "metrics.hh"
 #include "registry.hh"
 #include "output_formatter.hh"
@@ -52,9 +53,11 @@ namespace prometheus {
     BaseHistogram(std::string const &name, std::string const &help,
                   std::vector<double> const &levels, stringarray const &labels)
         : impl::LabeledMetric<N + 1, impl::HistogramValue>(name, help, labels) {
-      double last_level = std::numeric_limits<double>::min();
+      double last_level = std::numeric_limits<double>::lowest();
       for (auto const &l : levels) {
-        // TODO(korfuri): if (l <= last_level) throw Something();
+        if (l <= last_level) {
+          throw err::UnsortedLevelsException();
+        }
         levels_.push_back(std::make_pair(l, double_to_string(l)));
         last_level = l;
       }

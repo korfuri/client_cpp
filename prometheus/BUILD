@@ -5,7 +5,10 @@ cc_library(
     name = "client_lib",
     srcs = ["client.cc"],
     hdrs = ["client.hh"],
-    deps = [":client_lib_impl"],
+    deps = [
+        ":client_lib_impl",
+        ":client_exceptions_lib",
+    ],
     visibility = ["//visibility:public"])
 
 cc_library(
@@ -22,10 +25,17 @@ cc_library(
         "values.hh",
     ],
     deps = [
+        ":client_exceptions_lib",
         "//prometheus/util:container_hash_lib",
         "//prometheus/util:extend_array_lib",
         "//prometheus/util:zipped_iterator_lib",
     ])
+
+cc_library(
+    name = "client_exceptions_lib",
+    srcs = ["exceptions.cc"],
+    hdrs = ["exceptions.hh"],
+    visibility = ["//visibility:public"])
 
 cc_binary(
     name = "client_demo",

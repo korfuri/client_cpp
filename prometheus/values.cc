@@ -1,9 +1,13 @@
+#include "exceptions.hh"
 #include "values.hh"
 
 namespace prometheus {
   namespace impl {
 
     void CounterValue::inc(double value) {
+      if (value < 0) {
+        throw err::NegativeCounterIncrementException();
+      }
       double current = value_.load();
       while (!(value_.compare_exchange_weak(current, current + value)))
         ;
