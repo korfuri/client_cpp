@@ -47,7 +47,27 @@ namespace prometheus {
   template <int N>
   class BaseHistogram
       : public impl::LabeledMetric<N + 1, impl::HistogramValue> {
+  private:
     typedef std::array<std::string, N + 1> stringarray;
+
+  public:
+    std::string level_up(double v) {
+      // Returns the first level that contains a value v. This is
+      // useful for testing, if you want to check that a certain value
+      // is present. You can do:
+      //  Histogram<0> h("h", "h");
+      //  h.add(4.2);
+      //  double x = h.labels({h.level_up(4.2)}).value();
+      //  assert(x == 1.0);
+      double previous = std::numeric_limits<double>::lowest();
+      for (auto it = levels_.begin(); it != levels_.end(); ++it) {
+	if (it->first >= v && v > previous) {
+	  return it->second;
+        }
+      }
+      // Should be unreachable
+      return kInfStr;
+    }
 
    protected:
     BaseHistogram(std::string const &name, std::string const &help,
@@ -68,28 +88,6 @@ namespace prometheus {
       }
     }
 
-    std::string level_up(double v) {
-      // Returns the first level that contains a value v. This is
-      // useful for testing, if you want to check that a certain value
-      // is present. You can do:
-      //  Histogram<0> h("h", "h");
-      //  h.add(4.2);
-      //  double x = h.labels({h.level_up(4.2)}).value();
-      //  assert(x == 1.0);
-      for (auto it = levels_.begin(); it != levels_.end(); ++it) {
-        if (it->first < v) {
-          ++it;
-          if (it == levels_.end()) {
-            return kInfStr;
-          } else {
-            return it->second;
-          }
-        }
-        return kInfStr;
-      }
-    }
-
-   protected:
     std::vector<std::pair<double, std::string>> levels_;
   };
 
@@ -106,9 +104,9 @@ namespace prometheus {
 
     void record(double value, stringarray const &labels) {
       for (auto const &lvl : this->levels_) {
+	auto& row = this->labels(util::extend_array<N, std::string>(labels, lvl.second));
         if (value <= lvl.first) {
-          this->labels(util::extend_array<N, std::string>(labels, lvl.second))
-              .inc();
+          row.inc();
         }
       }
     }
@@ -123,8 +121,9 @@ namespace prometheus {
 
     void record(double value) {
       for (auto const &lvl : levels_) {
+	auto& row = this->labels({{lvl.second}});
         if (value <= lvl.first) {
-          this->labels({{lvl.second}}).inc();
+          row.inc();
         }
       }
     }

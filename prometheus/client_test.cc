@@ -28,7 +28,9 @@ namespace {
     EXPECT_EQ(0, c2.labels({"c", "a"}).value());
     EXPECT_EQ(1.0, c2.labels({"c", "c"}).value());
 
-    // TODO(korfuri): Test that inc(x) for x<0 throws an exception.
+    // Decrementing a counter throws.
+    EXPECT_THROW(c0.inc(-1), err::NegativeCounterIncrementException);
+    EXPECT_NO_THROW(c0.inc(0));
   }
 
   Gauge<0> g0("test_gauge0", "test Gauge<0>");
@@ -63,7 +65,14 @@ namespace {
                    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
   Histogram<1> h1("test_histogram1", "test Histogram<1>", {{"x"}});
 
-  TEST_F(ClientCPPTest, HistogramTest) {
+  TEST_F(ClientCPPTest, LevelUpTest) {
+    EXPECT_EQ("1.000000", h0a.level_up(0.9));
+    EXPECT_EQ("1.000000", h0a.level_up(1));
+    EXPECT_EQ("2.000000", h0a.level_up(1.1));
+    EXPECT_EQ("+Inf", h0a.level_up(11));
+  }
+
+  TEST_F(ClientCPPTest, UnlabelledHistogramTest) {
     h0.record(1.5);
     h0.record(7.5);
     h0a.record(1.5);
@@ -72,8 +81,43 @@ namespace {
     h0b.record(7.5);
 
     EXPECT_EQ(0, h0.labels({"0.050000"}).value());
+    EXPECT_EQ(0, h0a.labels({"0.050000"}).value());
+    EXPECT_EQ(0, h0b.labels({"0.050000"}).value());
+
+    EXPECT_EQ(1, h0.labels({"5.000000"}).value());
+    EXPECT_EQ(1, h0a.labels({"5.000000"}).value());
+    EXPECT_EQ(1, h0b.labels({"5.000000"}).value());
+
+    EXPECT_EQ(0, h0.labels({"6.000000"}).value());
+    EXPECT_EQ(2, h0.labels({"7.500000"}).value());
+    EXPECT_EQ(1, h0a.labels({"6.000000"}).value());
+    EXPECT_EQ(1, h0b.labels({"6.000000"}).value());
+
+    EXPECT_EQ(2, h0.labels({h0.level_up(7.5)}).value());
+    EXPECT_EQ(2, h0a.labels({h0a.level_up(7.5)}).value());
+    EXPECT_EQ(2, h0b.labels({h0b.level_up(7.5)}).value());
+
+    EXPECT_EQ(2, h0.labels({kInfStr}).value());
+    EXPECT_EQ(2, h0a.labels({kInfStr}).value());
+    EXPECT_EQ(2, h0b.labels({kInfStr}).value());
   }
 
+  TEST_F(ClientCPPTest, LabelledHistogramTest) {
+    h1.record(4.2, {"a"});
+    h1.record(4.6, {"b"});
+    h1.record(5.6, {"b"});
+
+    EXPECT_EQ(1, h1.labels({"a", h1.level_up(4.2)}).value());
+    EXPECT_EQ(1, h1.labels({"b", h1.level_up(4.6)}).value());
+    EXPECT_EQ(2, h1.labels({"b", h1.level_up(5.6)}).value());
+
+    EXPECT_EQ(1, h1.labels({"a", kInfStr}).value());
+    EXPECT_EQ(2, h1.labels({"b", kInfStr}).value());
+  }
+
+  TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
+    EXPECT_THROW(new Histogram<0>("test", "test", {3,2,1,0}), err::UnsortedLevelsException);
+  }
 } /* namespace */
 
 int main(int argc, char **argv) {
