@@ -1,39 +1,61 @@
+#include "client.hh"
 #include <string>
 #include <gtest/gtest.h>
 
 namespace {
 
-class ClientCPPTest : public ::testing::Test {
- protected:
-  // You can remove any or all of the following functions if its body
-  // is empty.
+using namespace prometheus;
 
-  ClientCPPTest() {
-    // You can do set-up work for each test here.
-  }
+class ClientCPPTest : public ::testing::Test {};
 
-  virtual ~ClientCPPTest() {
-    // You can do clean-up work that doesn't throw exceptions here.
-  }
+Counter<0> c0("test_counter0");
+Counter<1> c1("test_counter1", {{"x"}});
+Counter<2> c2("test_counter2", {"x", "y"});
 
-  // If the constructor and destructor are not enough for setting up
-  // and cleaning up each test, you can define the following methods:
+TEST_F(ClientCPPTest, CounterTest) {
+  EXPECT_EQ(0, c0.value());
+  EXPECT_EQ(0, c1.labels({"a"}).value());
+  EXPECT_EQ(0, c2.labels({"a", "a"}).value());
 
-  virtual void SetUp() {
-    // Code here will be called immediately after the constructor (right
-    // before each test).
-  }
+  c0.inc();
+  c1.labels({"b"}).inc(2.3);
+  c2.labels({"c", "c"}).inc();
+  EXPECT_EQ(1.0, c0.value());
+  EXPECT_EQ(0, c1.labels({"a"}).value());
+  EXPECT_EQ(2.3, c1.labels({"b"}).value());
+  EXPECT_EQ(0, c2.labels({"a", "a"}).value());
+  EXPECT_EQ(0, c2.labels({"a", "c"}).value());
+  EXPECT_EQ(0, c2.labels({"c", "a"}).value());
+  EXPECT_EQ(1.0, c2.labels({"c", "c"}).value());
 
-  virtual void TearDown() {
-    // Code here will be called immediately after each test (right
-    // before the destructor).
-  }
+  // TODO(korfuri): Test that inc(x) for x<0 throws an exception.
+}
 
-  // Objects declared here can be used by all tests in the test case for Foo.
-};
+Gauge<0> g0("test_gauge0");
+Gauge<1> g1("test_gauge1", {{"x"}});
+Gauge<2> g2("test_gauge2", {"x", "y"});
 
-// Tests that the Foo::Bar() method does Abc.
-TEST_F(ClientCPPTest, NothingTest) {}
+TEST_F(ClientCPPTest, GaugeTest) {
+  EXPECT_EQ(0, g0.value());
+  EXPECT_EQ(0, g1.labels({"a"}).value());
+  EXPECT_EQ(0, g2.labels({"a", "a"}).value());
+
+  g0.set(4.2);
+  g1.labels({"b"}).set(1.1);
+  g2.labels({"c", "c"}).set(2.4);
+  EXPECT_EQ(4.2, g0.value());
+  EXPECT_EQ(0, g1.labels({"a"}).value());
+  EXPECT_EQ(1.1, g1.labels({"b"}).value());
+  EXPECT_EQ(0, g2.labels({"a", "a"}).value());
+  EXPECT_EQ(0, g2.labels({"a", "c"}).value());
+  EXPECT_EQ(0, g2.labels({"c", "a"}).value());
+  EXPECT_EQ(2.4, g2.labels({"c", "c"}).value());
+
+  g0.set(-1.2);
+  EXPECT_EQ(-1.2, g0.value());
+}
+
+// TODO(korfuri): Test histograms.
 
 } /* namespace */
 
