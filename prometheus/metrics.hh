@@ -20,9 +20,14 @@ class Registry;
 
 class AbstractMetric {
  public:
-  AbstractMetric();
-  AbstractMetric(Registry* reg);
+  AbstractMetric(const std::string& name, const std::string& help);
+  AbstractMetric(const std::string& name, const std::string& help,
+                 Registry* reg);
   virtual void output(OutputFormatter&) const = 0;
+
+ protected:
+  std::string name_;
+  std::string help_;
 };
 
 template <int N, class MetricType>
@@ -30,8 +35,9 @@ class LabeledMetric : public AbstractMetric {
   typedef std::array<std::string, N> stringarray;
 
  public:
-  LabeledMetric(std::string const& name, stringarray const& labelnames)
-      : name_(name), labelnames_(labelnames) {
+  LabeledMetric(std::string const& name, std::string const& help,
+                stringarray const& labelnames)
+      : AbstractMetric(name, help), labelnames_(labelnames) {
     static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
   }
 
@@ -51,12 +57,11 @@ class LabeledMetric : public AbstractMetric {
   }
 
   virtual void output(OutputFormatter& f) const {
-    f.addMetric(name_, MetricType::type_);
+    f.addMetric(name_, help_, MetricType::type_);
     value_output(f);
   }
 
  private:
-  const std::string name_;
   stringarray const labelnames_;
   mutable std::mutex mutex_;
   std::unordered_map<stringarray, MetricType, util::ContainerHash<stringarray>,
@@ -66,15 +71,13 @@ class LabeledMetric : public AbstractMetric {
 template <class MetricType>
 class UnlabeledMetric : public AbstractMetric, public MetricType {
  public:
-  UnlabeledMetric(std::string const& name) : name_(name) {}
+  UnlabeledMetric(std::string const& name, std::string const& help)
+      : AbstractMetric(name, help) {}
 
   virtual void output(OutputFormatter& f) const {
-    f.addMetric(name_, MetricType::type_);
+    f.addMetric(name_, help_, MetricType::type_);
     f.addMetricValue(name_, this->value_);
   }
-
- private:
-  std::string const name_;
 };
 
 } /* namespace impl */

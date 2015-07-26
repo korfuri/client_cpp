@@ -32,10 +32,10 @@ class BaseHistogram : public impl::AbstractMetric {
   typedef std::array<std::string, N + 1> stringarray;
 
  protected:
-  BaseHistogram(std::string const& name, std::vector<double> const& levels,
-                stringarray const& labels)
-      : name_(name),
-        counters_(name, labels),
+  BaseHistogram(std::string const& name, std::string const& help,
+                std::vector<double> const& levels, stringarray const& labels)
+      : AbstractMetric(name, help),
+        counters_(name, help, labels),
         levels_(levels.size()),
         last_level_is_inf_(isposinf(levels[levels.size() - 1])) {
     std::transform(levels.begin(), levels.end(), levels_.begin(), [](double d) {
@@ -55,12 +55,11 @@ class BaseHistogram : public impl::AbstractMetric {
 
  public:
   virtual void output(impl::OutputFormatter& f) const {
-    f.addMetric(name_, "histogram");
+    f.addMetric(name_, help_, "histogram");
     counters_.value_output(f);
   }
 
  protected:
-  std::string name_;
   Counter<N + 1> counters_;
   std::vector<std::pair<double, std::string>> levels_;
   bool last_level_is_inf_;
@@ -71,9 +70,9 @@ class Histogram : public BaseHistogram<N> {
   typedef std::array<std::string, N> stringarray;
 
  public:
-  Histogram(std::string const& name, std::vector<double> const& levels,
-            stringarray const& labels)
-      : BaseHistogram<N>(name, levels,
+  Histogram(std::string const& name, std::string const& help,
+            std::vector<double> const& levels, stringarray const& labels)
+      : BaseHistogram<N>(name, help, levels,
                          util::extend_array(labels, std::string("le"))) {}
 
   void add(double value, stringarray const& labels) {
@@ -93,8 +92,9 @@ class Histogram : public BaseHistogram<N> {
 template <>
 class Histogram<0> : public BaseHistogram<0> {
  public:
-  Histogram(std::string const& name, std::vector<double> const& levels)
-      : BaseHistogram<0>(name, levels, {{"le"}}) {}
+  Histogram(std::string const& name, std::string const& help,
+            std::vector<double> const& levels)
+      : BaseHistogram<0>(name, help, levels, {{"le"}}) {}
 
   void add(double value) {
     for (auto const& lvl : levels_) {

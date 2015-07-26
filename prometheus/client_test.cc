@@ -8,9 +8,9 @@ using namespace prometheus;
 
 class ClientCPPTest : public ::testing::Test {};
 
-Counter<0> c0("test_counter0");
-Counter<1> c1("test_counter1", {{"x"}});
-Counter<2> c2("test_counter2", {"x", "y"});
+Counter<0> c0("test_counter0", "test Counter<0>");
+Counter<1> c1("test_counter1", "test Counter<1>", {{"x"}});
+Counter<2> c2("test_counter2", "test Counter<2>", {"x", "y"});
 
 TEST_F(ClientCPPTest, CounterTest) {
   EXPECT_EQ(0, c0.value());
@@ -31,9 +31,9 @@ TEST_F(ClientCPPTest, CounterTest) {
   // TODO(korfuri): Test that inc(x) for x<0 throws an exception.
 }
 
-Gauge<0> g0("test_gauge0");
-Gauge<1> g1("test_gauge1", {{"x"}});
-Gauge<2> g2("test_gauge2", {"x", "y"});
+Gauge<0> g0("test_gauge0", "test Gauge<0>");
+Gauge<1> g1("test_gauge1", "test Gauge<1>", {{"x"}});
+Gauge<2> g2("test_gauge2", "test Gauge<2>", {"x", "y"});
 
 TEST_F(ClientCPPTest, GaugeTest) {
   EXPECT_EQ(0, g0.value());

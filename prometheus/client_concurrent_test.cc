@@ -10,8 +10,8 @@ using namespace prometheus;
 
 class ClientConcurrentTest : public ::testing::Test {};
 
-Counter<0> c0("test_counter0");
-Counter<1> c1("test_counter1", {{"even"}});
+Counter<0> c0("test_counter0", "Test Counter<0>.");
+Counter<1> c1("test_counter1", "Test Counter<1>.", {{"even"}});
 
 const int kIterations = 1000;
 const int kThreads = 40;
@@ -36,8 +36,8 @@ TEST_F(ClientConcurrentTest, CounterTest) {
   EXPECT_EQ(kThreads * kIterations / 2, c1.labels({{"1"}}).value());
 }
 
-Gauge<0> g0("test_gauge0");
-Gauge<1> g1("test_gauge1", {{"even"}});
+Gauge<0> g0("test_gauge0", "Test Gauge<0>.");
+Gauge<1> g1("test_gauge1", "Test Gauge<1>.", {{"even"}});
 
 void f_gaugetest(int threadid) {
   g0.set(threadid);

@@ -11,7 +11,9 @@ class OutputFormatter {
  public:
   OutputFormatter(std::ostream& os);
 
-  void addMetric(std::string const& name, std::string const& type);
+  void addMetric(std::string const& name,
+		 std::string const& help,
+		 std::string const& type);
 
   void addMetricValue(std::string const& name, double value);
 
