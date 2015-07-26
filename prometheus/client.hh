@@ -4,6 +4,7 @@
 #include "metrics.hh"
 #include "registry.hh"
 #include "output_formatter.hh"
+#include "util/extend_array.hh"
 #include "values.hh"
 
 namespace prometheus {
@@ -65,14 +66,6 @@ class BaseHistogram : public impl::AbstractMetric {
   bool last_level_is_inf_;
 };
 
-template <unsigned long N, typename T = std::string>
-std::array<T, N + 1> extend_array(std::array<T, N> const& ar, T const& v) {
-  std::array<T, N + 1> ret;
-  std::copy(ar.begin(), ar.end(), ret.begin());
-  ret[ret.size() - 1] = v;
-  return ret;
-}
-
 template <int N>
 class Histogram : public BaseHistogram<N> {
   typedef std::array<std::string, N> stringarray;
@@ -81,17 +74,17 @@ class Histogram : public BaseHistogram<N> {
   Histogram(std::string const& name, std::vector<double> const& levels,
             stringarray const& labels)
       : BaseHistogram<N>(name, levels,
-                         extend_array(labels, std::string("le"))) {}
+                         util::extend_array(labels, std::string("le"))) {}
 
   void add(double value, stringarray const& labels) {
     for (auto const& lvl : this->levels_) {
       if (value > lvl.first) {
-        this->counters_.labels(extend_array<N, std::string>(labels, lvl.second))
-            .inc();
+        this->counters_.labels(util::extend_array<N, std::string>(
+                                   labels, lvl.second)).inc();
       }
     }
     if (!this->last_level_is_inf_) {
-      this->counters_.labels(extend_array<N, std::string>(labels, "+Inf"))
+      this->counters_.labels(util::extend_array<N, std::string>(labels, "+Inf"))
           .inc();
     }
   }

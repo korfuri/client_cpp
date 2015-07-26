@@ -22,8 +22,9 @@ cc_library(
         "values.hh",
     ],
     deps = [
-        "//prometheus/util:zipped_iterator_lib",
         "//prometheus/util:container_hash_lib",
+        "//prometheus/util:extend_array_lib",
+        "//prometheus/util:zipped_iterator_lib",
     ])
 
 cc_binary(
