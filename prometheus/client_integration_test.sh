@@ -15,7 +15,7 @@ sort "${REF?}" > "${SORTED_REF?}"
 echo "Original output can be found at ${OUT?}"
 echo "Sorted output can be found at ${SORTED_OUT?}"
 echo "Original reference can be found at ${REF}"
-echo "Sorted output can be found at ${SORTED_REF?}"
+echo "Sorted reference can be found at ${SORTED_REF?}"
 echo
 
 exec diff "${SORTED_OUT?}" "${SORTED_REF?}"
