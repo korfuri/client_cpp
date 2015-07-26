@@ -8,7 +8,7 @@ namespace impl {
 OutputFormatter::OutputFormatter(std::ostream& os) : os_(os) {}
 
 void OutputFormatter::addMetric(std::string const& name,
-				std::string const& help,
+                                std::string const& help,
                                 std::string const& type) {
   os_ << "# HELP " << name << ' ' << help << std::endl;
   os_ << "# TYPE " << name << ' ' << type << std::endl;
