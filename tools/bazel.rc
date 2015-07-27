@@ -1,5 +1,3 @@
-import /home/korfuri/.bazelrc
-
 # --config asan: Address sanitizer
 # build:asan --compiler clang
 build:asan --strip=never
