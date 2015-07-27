@@ -81,6 +81,15 @@ namespace {
     EXPECT_EQ(3, idg0.value());
     idg0.dec(0.5);
     EXPECT_EQ(2.5, idg0.value());
+
+    {
+      InProgress _0(idg0);
+      InProgress _2(idg2.labels({"c", "c"}));
+      EXPECT_EQ(3.5, idg0.value());
+      EXPECT_EQ(3.4, idg2.labels({"c", "c"}).value());
+    }
+    EXPECT_EQ(2.5, idg0.value());
+    EXPECT_EQ(2.4, idg2.labels({"c", "c"}).value());
   }
 
   Histogram<0> h0("test_histogram0", "test Histogram<0>");

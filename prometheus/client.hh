@@ -32,6 +32,19 @@ namespace prometheus {
     using impl::UnlabeledMetric<impl::IncDecGaugeValue>::UnlabeledMetric;
   };
 
+  class InProgress {
+  public:
+    InProgress(impl::IncDecGaugeValue& g, double value = 1.0);
+    ~InProgress();
+  private:
+    InProgress(InProgress const&) = delete;
+    InProgress(InProgress&&) = delete;
+    InProgress& operator=(InProgress const&) = delete;
+    InProgress& operator=(InProgress&&) = delete;
+    impl::IncDecGaugeValue& g_;
+    double value_;
+  };
+
   template <int N>
   class Counter : public impl::LabeledMetric<N, impl::CounterValue> {
     using impl::LabeledMetric<N, impl::CounterValue>::LabeledMetric;

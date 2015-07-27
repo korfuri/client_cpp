@@ -63,13 +63,15 @@ namespace {
     EXPECT_EQ(1, (int)g1_odd % 2);
   }
 
-  IncDecGauge<0> idg0("test_set_gauge0", "Test SetGauge<0>.");
-  IncDecGauge<0> idg0a("test_set_gauge0a", "Test SetGauge<0>.");
-  IncDecGauge<1> idg1("test_set_gauge1", "Test SetGauge<1>.", {"threadid"});
+  IncDecGauge<0> idg0("test_incdec_gauge0", "Test IncDecGauge<0>.");
+  IncDecGauge<0> idg_inprogress("test_inprogress", "Test InProgress.");
+  IncDecGauge<0> idg0a("test_incdec_gauge0a", "Test IncDecGauge<0>.");
+  IncDecGauge<1> idg1("test_incdec_gauge1", "Test IncDecGauge<1>.", {"threadid"});
 
   void f_incdecgaugetest(int threadid) {
     std::string id = std::to_string(threadid);
     for (int i = 0; i < kIterations; ++i) {
+      InProgress ip(idg_inprogress);
       idg0.inc(threadid);
       idg0a.inc();
       idg1.labels({id}).inc();
@@ -88,6 +90,7 @@ namespace {
       t.join();
     }
     EXPECT_EQ(0, idg0.value());
+    EXPECT_EQ(0, idg_inprogress.value());
     EXPECT_EQ(kThreads * kIterations, idg0a.value());
     for (int i = 0; i < kThreads; ++i) {
       EXPECT_EQ(0, idg1.labels({std::to_string(i)}).value());
