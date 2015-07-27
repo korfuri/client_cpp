@@ -1,0 +1,27 @@
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+      # Package list from http://bazel.io/docs/install.html
+      - openjdk-7-jdk
+      - openjdk-7-source
+      - pkg-config
+      - zip
+      # - g++  # provided by g++-4.8
+      - zlib1g-dev
+
+# Eventually, Bazel will have binary packages and we'll be able to
+# just download a prebuilt distribution of Bazel. For now, build it
+# from source every time.
+before_install:
+  - git clone https://github.com/google/bazel.git
+  - pushd bazel
+  - cp -r ../.bazel-travis/custom_crosstool ./custom_crosstool
+  - BAZELRC=../.bazel-travis/bazelrc ./compile.sh
+  - popd
+
+script:
+  - bazel/output/bazel test //prometheus/...
