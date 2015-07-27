@@ -3,6 +3,8 @@
 
 #include <ostream>
 
+#include "prometheus/proto/metrics.pb.h"
+
 namespace prometheus {
 
   namespace impl {
