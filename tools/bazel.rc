@@ -1,3 +1,6 @@
+# This is so we use a recent enough GCC when building.
+build --crosstool_top //custom_crosstool:CROSSTOOL
+
 # --config asan: Address sanitizer
 # build:asan --compiler clang
 build:asan --strip=never
@@ -6,6 +9,7 @@ build:asan --copt -fsanitize=address
 build:asan --copt -O1
 build:asan --copt -fno-omit-frame-pointer
 build:asan --linkopt -fsanitize=address
+build:asan --crosstool_top //custom_crosstool:CROSSTOOL
 
 # --config tsan: ThreadSanitizer
 build:tsan --compiler clang  # GCC's malloc is not instrumented for tsan, causing lots of false positives
@@ -18,6 +22,7 @@ build:tsan --copt -O1
 build:tsan --copt -fno-omit-frame-pointer
 build:tsan --linkopt -fsanitize=thread
 build:tsan --linkopt -ltsan
+build:tsan --crosstool_top //custom_crosstool:CROSSTOOL
 
 # --config msan: Memory sanitizer
 build:msan --compiler clang  # GCC doesn't support msan
@@ -27,6 +32,7 @@ build:msan --copt -DADDRESS_SANITIZER
 build:msan --copt -O1
 build:msan --copt -fno-omit-frame-pointer
 build:msan --linkopt -fsanitize=memory
+build:msan --crosstool_top //custom_crosstool:CROSSTOOL
 
 # --config ubsan: Undefined Behavior Sanitizer
 # build:ubsan --compiler clang
@@ -36,3 +42,4 @@ build:ubsan --copt -O1
 build:ubsan --copt -fno-omit-frame-pointer
 build:ubsan --linkopt -fsanitize=undefined
 build:ubsan --linkopt -lubsan
+build:ubsan --crosstool_top //custom_crosstool:CROSSTOOL
