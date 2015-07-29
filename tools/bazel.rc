@@ -1,5 +1,5 @@
 # This is so we use a recent enough GCC when building.
-build --crosstool_top //custom_crosstool:CROSSTOOL
+build --crosstool_top //tools/bazel-travis/custom_crosstool:CROSSTOOL
 
 # --config asan: Address sanitizer
 # build:asan --compiler clang
