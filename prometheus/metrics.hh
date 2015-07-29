@@ -30,50 +30,55 @@ namespace prometheus {
       std::string help_;
     };
 
-    template <int N, class MetricType>
+    template <int N, class ValueType>
     class LabeledMetric : public AbstractMetric {
       typedef std::array<std::string, N> stringarray;
+      typedef std::unordered_map<stringarray, ValueType,
+				 util::ContainerHash<stringarray>,
+				 util::ContainerEq<stringarray>> map;
 
      public:
+      template<typename... ValueArgs>
       LabeledMetric(std::string const &name, std::string const &help,
-                    stringarray const &labelnames)
-          : AbstractMetric(name, help), labelnames_(labelnames) {
+                    stringarray const &labelnames, ValueArgs const&... va)
+	: AbstractMetric(name, help), default_value_(va...), labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
       }
 
-      MetricType &labels(stringarray const &labelvalues) {
+      ValueType &labels(stringarray const &labelvalues) {
         std::unique_lock<std::mutex> l(mutex_);
-        return values_[labelvalues];
+        return (values_.insert(typename map::value_type(labelvalues, default_value_))).first->second;
       }
 
       virtual void output(OutputFormatter &f) const {
-        f.addMetric(name_, help_, MetricType::type_);
+        f.addMetric(name_, help_, ValueType::type_);
         std::unique_lock<std::mutex> l(mutex_);
         for (const auto &it_v : values_) {
           auto zbegin =
               util::zip_iterators(labelnames_.begin(), it_v.first.begin());
           auto zend = util::zip_iterators(labelnames_.end(), it_v.first.end());
-          f.addMetricLabelRow(name_, zbegin, zend, it_v.second.value());
-        }
+	  it_v.second.value_output(f, name_, zbegin, zend);
+	}
       }
 
      private:
+      ValueType default_value_;
       stringarray const labelnames_;
       mutable std::mutex mutex_;
-      std::unordered_map<stringarray, MetricType,
-                         util::ContainerHash<stringarray>,
-                         util::ContainerEq<stringarray>> values_;
+      map values_;
     };
 
-    template <class MetricType>
-    class UnlabeledMetric : public AbstractMetric, public MetricType {
+    template <class ValueType>
+    class UnlabeledMetric : public AbstractMetric, public ValueType {
      public:
-      UnlabeledMetric(std::string const &name, std::string const &help)
-          : AbstractMetric(name, help) {}
+      template <typename... ValueArgs>
+      UnlabeledMetric(std::string const &name, std::string const &help,
+		      ValueArgs const&... va)
+	: AbstractMetric(name, help), ValueType(va...) {}
 
       virtual void output(OutputFormatter &f) const {
-        f.addMetric(name_, help_, MetricType::type_);
-        f.addMetricValue(name_, this->value_);
+        f.addMetric(name_, help_, ValueType::type_);
+	this->value_output(f, name_);
       }
     };
 

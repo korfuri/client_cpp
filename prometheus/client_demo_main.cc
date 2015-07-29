@@ -34,11 +34,11 @@ int main() {
 
   Histogram<2> blups_by_blip_blop(
       "blups_by_blip_blop", "Distribution of blups by blip and blop.",
-      {"blip", "blop"}, {0, 1, 10, 100, 1000, 10000});
-  blups_by_blip_blop.record(.5, {"a", "b"});
-  blups_by_blip_blop.record(5, {"a", "b"});
-  blups_by_blip_blop.record(10, {"a", "c"});
-  blups_by_blip_blop.record(10000000, {"e", "d"});
+      {"blip", "blop"}, histogram_levels({0, 1, 10, 100, 1000, 10000}));
+  blups_by_blip_blop.labels({"a", "b"}).record(.5);
+  blups_by_blip_blop.labels({"a", "b"}).record(5);
+  blups_by_blip_blop.labels({"a", "c"}).record(10);
+  blups_by_blip_blop.labels({"e", "d"}).record(10000000);
 
   prometheus::impl::global_registry.output(std::cout);
 

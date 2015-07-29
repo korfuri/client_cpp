@@ -94,18 +94,18 @@ namespace {
 
   Histogram<0> h0("test_histogram0", "test Histogram<0>");
   Histogram<0> h0a("test_histogram0a", "test Histogram<0> with custom levels",
-                   {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, kInf});
+                   histogram_levels({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, kInf}));
   Histogram<0> h0b("test_histogram0b",
                    "test Histogram<0> with custom levels without infinity",
-                   {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+                   histogram_levels({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
   Histogram<1> h1("test_histogram1", "test Histogram<1>", {{"x"}});
 
-  TEST_F(ClientCPPTest, LevelUpTest) {
-    EXPECT_EQ("1.000000", h0a.level_up(0.9));
-    EXPECT_EQ("1.000000", h0a.level_up(1));
-    EXPECT_EQ("2.000000", h0a.level_up(1.1));
-    EXPECT_EQ("+Inf", h0a.level_up(11));
-  }
+  // TEST_F(ClientCPPTest, LevelUpTest) {
+  //   EXPECT_EQ("1.000000", h0a.level_up(0.9));
+  //   EXPECT_EQ("1.000000", h0a.level_up(1));
+  //   EXPECT_EQ("2.000000", h0a.level_up(1.1));
+  //   EXPECT_EQ("+Inf", h0a.level_up(11));
+  // }
 
   TEST_F(ClientCPPTest, UnlabelledHistogramTest) {
     h0.record(1.5);
@@ -115,43 +115,50 @@ namespace {
     h0b.record(1.5);
     h0b.record(7.5);
 
-    EXPECT_EQ(0, h0.labels({"0.050000"}).value());
-    EXPECT_EQ(0, h0a.labels({"0.050000"}).value());
-    EXPECT_EQ(0, h0b.labels({"0.050000"}).value());
+    EXPECT_EQ(0, h0.value(0.05));
+    EXPECT_EQ(0, h0a.value(0.05));
+    EXPECT_EQ(0, h0b.value(0.05));
 
-    EXPECT_EQ(1, h0.labels({"5.000000"}).value());
-    EXPECT_EQ(1, h0a.labels({"5.000000"}).value());
-    EXPECT_EQ(1, h0b.labels({"5.000000"}).value());
+    EXPECT_EQ(1, h0.value(5));
+    EXPECT_EQ(1, h0a.value(5));
+    EXPECT_EQ(1, h0b.value(5));
 
-    EXPECT_EQ(0, h0.labels({"6.000000"}).value());
-    EXPECT_EQ(2, h0.labels({"7.500000"}).value());
-    EXPECT_EQ(1, h0a.labels({"6.000000"}).value());
-    EXPECT_EQ(1, h0b.labels({"6.000000"}).value());
+    EXPECT_EQ(2, h0.value(6));
+    EXPECT_EQ(2, h0.value(7.5));
+    EXPECT_EQ(1, h0a.value(6));
+    EXPECT_EQ(1, h0b.value(6));
 
-    EXPECT_EQ(2, h0.labels({h0.level_up(7.5)}).value());
-    EXPECT_EQ(2, h0a.labels({h0a.level_up(7.5)}).value());
-    EXPECT_EQ(2, h0b.labels({h0b.level_up(7.5)}).value());
+    EXPECT_EQ(2, h0.value(7.5));
+    EXPECT_EQ(2, h0a.value(7.5));
+    EXPECT_EQ(2, h0b.value(7.5));
 
-    EXPECT_EQ(2, h0.labels({kInfStr}).value());
-    EXPECT_EQ(2, h0a.labels({kInfStr}).value());
-    EXPECT_EQ(2, h0b.labels({kInfStr}).value());
+    EXPECT_EQ(2, h0.value());
+    EXPECT_EQ(2, h0a.value());
+    EXPECT_EQ(2, h0b.value());
+
+    EXPECT_EQ(2, h0.value(kInf));
+    EXPECT_EQ(2, h0a.value(kInf));
+    EXPECT_EQ(2, h0b.value(kInf));
   }
 
   TEST_F(ClientCPPTest, LabelledHistogramTest) {
-    h1.record(4.2, {"a"});
-    h1.record(4.6, {"b"});
-    h1.record(5.6, {"b"});
+    h1.labels({"a"}).record(4.2);
+    h1.labels({"b"}).record(4.6);
+    h1.labels({"b"}).record(5.6);
 
-    EXPECT_EQ(1, h1.labels({"a", h1.level_up(4.2)}).value());
-    EXPECT_EQ(1, h1.labels({"b", h1.level_up(4.6)}).value());
-    EXPECT_EQ(2, h1.labels({"b", h1.level_up(5.6)}).value());
+    EXPECT_EQ(1, h1.labels({"a"}).value(4.2));
+    EXPECT_EQ(1, h1.labels({"b"}).value(4.6));
+    EXPECT_EQ(2, h1.labels({"b"}).value(5.6));
 
-    EXPECT_EQ(1, h1.labels({"a", kInfStr}).value());
-    EXPECT_EQ(2, h1.labels({"b", kInfStr}).value());
+    EXPECT_EQ(1, h1.labels({"a"}).value());
+    EXPECT_EQ(2, h1.labels({"b"}).value());
+
+    EXPECT_EQ(1, h1.labels({"a"}).value(kInf));
+    EXPECT_EQ(2, h1.labels({"b"}).value(kInf));
   }
 
   TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
-    EXPECT_THROW(new Histogram<0>("test", "test", {3,2,1,0}), err::UnsortedLevelsException);
+    EXPECT_THROW(new Histogram<0>("test", "test", histogram_levels({3,2,1,0})), err::UnsortedLevelsException);
   }
 } /* namespace */
 
