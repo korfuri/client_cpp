@@ -17,8 +17,9 @@ addons:
 # just download a prebuilt distribution of Bazel. For now, build it
 # from source every time.
 before_install:
-  - git clone https://github.com/google/bazel.git
+  - git clone https://github.com/google/bazel.git 
   - pushd bazel
+  - git checkout d93990f9ae43146dba1e6b57730907b69685a75f
   - cp -r ../tools/bazel-travis/custom_crosstool ./custom_crosstool
   - BAZELRC=../tools/bazel-travis/bazelrc ./compile.sh
   - popd
