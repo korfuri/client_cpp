@@ -160,6 +160,15 @@ namespace {
   TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
     EXPECT_THROW(new Histogram<0>("test", "test", histogram_levels({3,2,1,0})), err::UnsortedLevelsException);
   }
+
+  TEST_F(ClientCPPTest, HistogramLevelsTest) {
+    EXPECT_EQ(std::vector<double>({0, 1, 2, 4, 8, kInf}),
+              (histogram_levels_powers_of(2, 4)));
+    EXPECT_EQ(std::vector<double>({0, 1, 2, 4, 8, kInf}),
+              histogram_levels_powers_of(2, 4));
+    EXPECT_ANY_THROW(histogram_levels_powers_of(2, 0));
+    EXPECT_ANY_THROW(histogram_levels_powers_of(2, -8));
+  }
 } /* namespace */
 
 int main(int argc, char **argv) {
