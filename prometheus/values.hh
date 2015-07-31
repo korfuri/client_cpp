@@ -71,7 +71,7 @@ namespace prometheus {
 
       template<typename... ContextParams>
       void value_output(OutputFormatter& f, ContextParams const&... params) const {
-	std::atomic<double>* it = values_;
+	auto it = values_.begin();
 	for (auto const& l : levels_) {
 	  f.addMetricValue(*it, l, params...);
 	  ++it;
@@ -82,7 +82,7 @@ namespace prometheus {
 
     private:
       const std::vector<double> levels_;
-      std::atomic<double>* values_;
+      std::vector<std::atomic<double>> values_;
     };
 
   } /* namespace impl */

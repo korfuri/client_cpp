@@ -56,7 +56,7 @@ namespace prometheus {
 
     HistogramValue::HistogramValue(std::vector<double> const& levels) :
       levels_(add_inf(levels)),
-      values_(new std::atomic<double>[levels_.size()]) {
+      values_(levels_.size()) {
       double last_level = std::numeric_limits<double>::lowest();
       for (auto const &l : levels) {
         if (l <= last_level) {
@@ -68,12 +68,11 @@ namespace prometheus {
 
     HistogramValue::HistogramValue(HistogramValue const& rhs) :
       levels_(rhs.levels_),
-      values_(new std::atomic<double>[rhs.levels_.size()]) {
+      values_(rhs.levels_.size()) {
     }
 
 
     HistogramValue::~HistogramValue() {
-      delete[] values_;
     }
 
     bool HistogramValue::is_posinf(double d) {
@@ -93,7 +92,7 @@ namespace prometheus {
 
     void HistogramValue::record(double v) {
       auto lvl_it = levels_.begin();
-      auto v_it = &(values_[0]);
+      auto v_it = values_.begin();
       while (lvl_it != levels_.end()) {
 	if (v <= *lvl_it) {
 	  double current = v_it->load();
@@ -107,7 +106,7 @@ namespace prometheus {
 
     double HistogramValue::value(double d) const {
       auto lvl_it = levels_.begin();
-      auto v_it = &(values_[0]);
+      auto v_it = values_.begin();
       while (lvl_it != levels_.end()) {
 	if (d <= *lvl_it) {
 	  return v_it->load(std::memory_order_relaxed);
@@ -115,7 +114,7 @@ namespace prometheus {
 	++lvl_it;
 	++v_it;
       }
-      return values_[levels_.size() - 1].load(std::memory_order_relaxed);
+      return values_.back().load(std::memory_order_relaxed);
     }
 
     const std::string CounterValue::type_ = "counter";
