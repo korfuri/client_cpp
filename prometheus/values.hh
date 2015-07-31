@@ -20,7 +20,10 @@ namespace prometheus {
     class BaseScalarValue {
       // A base class used by the various scalar values (counter and gauges).
      public:
-      BaseScalarValue() : value_(0) {}
+      BaseScalarValue() : value_(0) {
+	static_assert(sizeof(BaseScalarValue) == sizeof(std::atomic<double>),
+		      "BaseScalarValue is not meant to have a vtable or to be used polymorphically.");
+      }
       ~BaseScalarValue() {}
       BaseScalarValue(BaseScalarValue const& rhs) : value_(rhs.value_.load()) {}
 
