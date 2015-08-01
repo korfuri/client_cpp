@@ -83,8 +83,10 @@ namespace prometheus {
         if (m.label_size() > 0) {
           ss << ',';
         }
-        ss << "le=" << escape_double(b.upper_bound())
-           << "} = " << b.cumulative_count() << std::endl;
+        // TODO(korfuri): Do we need quotes around the value here?
+        // le="0.1" or le=0.1?
+        ss << "le=\"" << escape_double(b.upper_bound())
+           << "\"} = " << b.cumulative_count() << std::endl;
       }
     }
 
@@ -185,8 +187,7 @@ namespace prometheus {
     }
 
     std::string escape_label_value(std::string const& s) {
-      // TODO(korfuri): Escape this properly.
-      return s;
+      return std::string("\"") + s + "\"";
     }
 
     std::string escape_double(double d) {

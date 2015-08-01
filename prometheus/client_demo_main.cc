@@ -42,11 +42,11 @@ int main() {
   blups_by_blip_blop.labels({"a", "c"}).record(10);
   blups_by_blip_blop.labels({"e", "d"}).record(10000000);
 
-  Counter<1> unicode("üñíçøđè-metric",
-		     "This metric tests üñíçøđè support",
-		     {"lábel"});
-  unicode.labels({"valüe"}).inc();
-  unicode.labels({"🍌"}).inc(2);
+  Counter<1> unicode(u8"üñíçøđè-metric",
+                     u8"This metric tests üñíçøđè support",
+                     {u8"lábel"});
+  unicode.labels({u8"valüe"}).inc();
+  unicode.labels({u8"🍌"}).inc(2);
 
   auto v = prometheus::impl::global_registry.output_proto();
   for (auto m : v) {
