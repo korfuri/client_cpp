@@ -9,13 +9,14 @@ int main() {
   blips.set(4.2);
 
   SetGauge<1> blops_by_blarg("blops_by_blarg_total",
-                          "Total number of blops for each blarg.", {"blarg"});
+                             "Total number of blops for each blarg.",
+                             {"blarg"});
   blops_by_blarg.labels({{"grunt"}}).set(1.3);
   blops_by_blarg.labels({{"blub"}}).set(8.6);
 
-  SetGauge<2> blops_by_blarg_blurg("blops_by_blarg_blurg_total",
-                                "Total number of blops for each (blarg,blurg).",
-                                {"blarg", "blurg"});
+  SetGauge<2> blops_by_blarg_blurg(
+      "blops_by_blarg_blurg_total",
+      "Total number of blops for each (blarg,blurg).", {"blarg", "blurg"});
   blops_by_blarg_blurg.labels({"grunt", "knix"}).set(1.3);
   blops_by_blarg_blurg.labels({"blub", "knix"}).set(8.6);
   blops_by_blarg_blurg.labels(std::array<std::string, 2>({"grunt", "knux"}))
@@ -40,7 +41,11 @@ int main() {
   blups_by_blip_blop.labels({"a", "c"}).record(10);
   blups_by_blip_blop.labels({"e", "d"}).record(10000000);
 
-  prometheus::impl::global_registry.output(std::cout);
-
+  auto v = prometheus::impl::global_registry.output_proto();
+  for (auto m : v) {
+    std::string s;
+    std::cout << prometheus::impl::metricfamily_proto_to_string(m);
+    delete m;
+  }
   return 0;
 }

@@ -1,61 +1,39 @@
 #ifndef PROMETHEUS_OUTPUT_FORMATTER_HH__
 #define PROMETHEUS_OUTPUT_FORMATTER_HH__
 
-#include <ostream>
-
 #include "prometheus/proto/metrics.pb.h"
+
+#include <string>
 
 namespace prometheus {
 
   namespace impl {
 
-    class OutputFormatter {
+    using ::io::prometheus::client::MetricFamily;
+    using ::io::prometheus::client::MetricType;
+
+    std::string metricfamily_proto_to_string(MetricFamily const* mf);
+
+    std::string escape_type(MetricType const& m);
+    std::string escape_double(double d);
+    std::string escape_metric_name(std::string const& s);
+    std::string escape_help(std::string const& s);
+    std::string escape_label_name(std::string const& s);
+    std::string escape_label_value(std::string const& s);
+
+    class OutputFormatterException : public std::exception {
      public:
-      OutputFormatter(std::ostream &os);
+      explicit OutputFormatterException(const char* reason) noexcept
+          : reason_(reason) {}
+      virtual const char* what() const noexcept { return reason_; }
 
-      void addMetric(std::string const &name, std::string const &help,
-                     std::string const &type);
-
-      void addMetricValue(double value, std::string const &name);
-      void addMetricValue(double value, double bucket, std::string const &name);
-
-      template <typename LabelIterator>
-      void addMetricValue(double value, std::string const &name,
-			  LabelIterator const &labels_begin,
-			  LabelIterator const &labels_end) {
-        if (labels_begin == labels_end) {
-          os_ << escape_metric_name(name) << " = " << escape_double(value) << std::endl;
-        } else {
-          os_ << escape_metric_name(name);
-          char nextchar = '{';
-          for (auto it = labels_begin; it != labels_end; ++it) {
-            os_ << nextchar << escape_label_name((*it).first) << '=' << escape_label_value((*it).second);
-            nextchar = ',';
-          }
-          os_ << "} = " << escape_double(value) << std::endl;
-        }
-      }
-
-      template <typename LabelIterator>
-      void addMetricValue(double value, double bucket,
-			  std::string const &name,
-			  LabelIterator const &labels_begin,
-			  LabelIterator const &labels_end) {
-	os_ << escape_metric_name(name) << "{le=" << escape_double(bucket);
-	for (auto it = labels_begin; it != labels_end; ++it) {
-	  os_ << ',' << escape_label_name((*it).first) << '=' << escape_label_value((*it).second);
-	}
-	os_ << "} = " << escape_double(value) << std::endl;
-      }
-
-      std::string escape_double(double d);
-      std::string escape_metric_name(std::string const& s);
-      std::string escape_help(std::string const& s);
-      std::string escape_label_name(std::string const& s);
-      std::string escape_label_value(std::string const& s);
+      static const char* const kEmptyMetricFamily;
+      static const char* const kInvalidMetricType;
+      static const char* const kMissingRequiredField;
+      static const char* const kSummariesNotImplemented;
 
      private:
-      std::ostream &os_;
+      const char* reason_;
     };
   }
 }

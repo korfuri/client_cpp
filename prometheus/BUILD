@@ -77,3 +77,14 @@ sh_test(
     ],
     size = "small",
     timeout = "short")
+
+cc_test(
+    name = "output_formatter_test",
+    srcs = ["output_formatter_test.cc"],
+    deps = [
+        ":client_lib",
+        "@gtest//gtest:gtest",
+        "@gtest//gtest:gtest_main",
+    ],
+    size = "small",
+    timeout = "short")

@@ -25,25 +25,21 @@ namespace prometheus {
       // A base class used by the various scalar values (counter and gauges).
      public:
       BaseScalarValue() : value_(0) {
-	static_assert(sizeof(BaseScalarValue) == sizeof(std::atomic<double>),
-		      "BaseScalarValue is not meant to have a vtable or to be used polymorphically.");
+        static_assert(sizeof(BaseScalarValue) == sizeof(std::atomic<double>),
+                      "BaseScalarValue is not meant to have a vtable or to be "
+                      "used polymorphically.");
       }
       ~BaseScalarValue() {}
       BaseScalarValue(BaseScalarValue const& rhs) : value_(rhs.value_.load()) {}
 
       double value() const { return value_.load(std::memory_order_relaxed); }
 
-      template<typename... ContextParams>
-      void value_output(OutputFormatter& f, ContextParams const&... params) const {
-        f.addMetricValue(this->value_, params...);
-      }
-
      protected:
       std::atomic<double> value_;
     };
 
     class BaseGaugeValue : public BaseScalarValue {
-    public:
+     public:
       void output_proto_value(Metric* m, MetricFamily* mf) const;
 
       const static std::string type_;
@@ -69,8 +65,9 @@ namespace prometheus {
     };
 
     class HistogramValue {
-    public:
-      HistogramValue(std::vector<double> const& levels = default_histogram_levels);
+     public:
+      HistogramValue(
+          std::vector<double> const& levels = default_histogram_levels);
       ~HistogramValue();
       HistogramValue(HistogramValue const& rhs);
       void record(double value);
@@ -80,20 +77,11 @@ namespace prometheus {
 
       double value(double threshold = kInf) const;
 
-      template<typename... ContextParams>
-      void value_output(OutputFormatter& f, ContextParams const&... params) const {
-	auto it = values_.begin();
-	for (auto const& l : levels_) {
-	  f.addMetricValue(*it, l, params...);
-	  ++it;
-	}
-      }
-
       void output_proto_value(Metric* m, MetricFamily* mf) const;
 
       const static std::string type_;
 
-    private:
+     private:
       const std::vector<double> levels_;
       std::vector<std::atomic<uint64_t>> values_;
       std::atomic<double> samples_sum_;

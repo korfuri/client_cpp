@@ -8,26 +8,18 @@ namespace prometheus {
 
     Registry global_registry;
 
-    void Registry::register_metric(AbstractMetric *metric) {
+    void Registry::register_metric(AbstractMetric* metric) {
       std::unique_lock<std::mutex> l(mutex_);
       metrics_.push_back(metric);
-    }
-
-    void Registry::output(std::ostream &os) const {
-      OutputFormatter f(os);
-      std::unique_lock<std::mutex> l(mutex_);
-      for (auto const m : metrics_) {
-        m->output(f);
-      }
     }
 
     std::vector<MetricFamily*> Registry::output_proto() const {
       std::vector<MetricFamily*> v;
       std::unique_lock<std::mutex> l(mutex_);
       for (auto const m : metrics_) {
-	auto* mf = new MetricFamily;
+        auto* mf = new MetricFamily;
         m->output_proto(mf);
-	v.push_back(mf);
+        v.push_back(mf);
       }
       return v;
     }
