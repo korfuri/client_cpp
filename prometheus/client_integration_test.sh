@@ -10,7 +10,7 @@ REF="prometheus/testdata/ref.txt"
 
 prometheus/client_demo > "${OUT?}"
 sort "${OUT?}" > "${SORTED_OUT?}"
-sort "${REF?}" > "${SORTED_REF?}"
+grep -v 'utf-8-unix' "${REF?}" | sort > "${SORTED_REF?}"
 
 echo "Original output can be found at ${OUT?}"
 echo "Sorted output can be found at ${SORTED_OUT?}"

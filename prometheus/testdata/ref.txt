@@ -1,3 +1,4 @@
+# -*- mode: C++; coding: utf-8-unix -*-
 # HELP blips_total Total number of blips.
 # TYPE blips_total gauge
 blips_total = 4.2
@@ -54,3 +55,7 @@ blups_by_blip_blop{blip=e,blop=d,le=100} = 0
 blups_by_blip_blop{blip=e,blop=d,le=1000} = 0
 blups_by_blip_blop{blip=e,blop=d,le=10000} = 0
 blups_by_blip_blop{blip=e,blop=d,le=+Inf} = 1
+# HELP üñíçøđè-metric This metric tests üñíçøđè support
+# TYPE üñíçøđè-metric counter
+üñíçøđè-metric{lábel=valüe} = 1
+üñíçøđè-metric{lábel=🍌} = 2

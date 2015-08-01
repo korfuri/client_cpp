@@ -1,3 +1,4 @@
+/* -*- mode: C++; coding: utf-8-unix -*- */
 #include "client.hh"
 
 #include <iostream>
@@ -40,6 +41,12 @@ int main() {
   blups_by_blip_blop.labels({"a", "b"}).record(5);
   blups_by_blip_blop.labels({"a", "c"}).record(10);
   blups_by_blip_blop.labels({"e", "d"}).record(10000000);
+
+  Counter<1> unicode("üñíçøđè-metric",
+		     "This metric tests üñíçøđè support",
+		     {"lábel"});
+  unicode.labels({"valüe"}).inc();
+  unicode.labels({"🍌"}).inc(2);
 
   auto v = prometheus::impl::global_registry.output_proto();
   for (auto m : v) {
