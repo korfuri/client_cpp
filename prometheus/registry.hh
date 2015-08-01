@@ -2,6 +2,7 @@
 #define PROMETHEUS_REGISTRY_HH__
 
 #include "metrics.hh"
+#include "prometheus/proto/metrics.pb.h"
 
 #include <ostream>
 #include <mutex>
@@ -10,10 +11,13 @@
 namespace prometheus {
   namespace impl {
 
+    using ::io::prometheus::client::MetricFamily;
+
     class Registry {
      public:
       void register_metric(AbstractMetric *metric);
       void output(std::ostream &os) const;
+      std::vector<MetricFamily*> output_proto() const;
 
      private:
       std::vector<AbstractMetric *> metrics_;

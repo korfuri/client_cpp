@@ -35,6 +35,16 @@ namespace prometheus {
 
   namespace impl {
 
+    using ::io::prometheus::client::Bucket;
+    using ::io::prometheus::client::Histogram;
+    using ::io::prometheus::client::Metric;
+    using ::io::prometheus::client::MetricFamily;
+
+    void BaseGaugeValue::output_proto_value(Metric* m, MetricFamily* mf) const {
+      m->mutable_gauge()->set_value(value_);
+      mf->set_type(::io::prometheus::client::MetricType::GAUGE);
+    }
+
     void IncDecGaugeValue::inc(double value) {
       double current = value_.load();
       while (!(value_.compare_exchange_weak(current, current + value)))
@@ -54,6 +64,11 @@ namespace prometheus {
         ;
     }
 
+    void CounterValue::output_proto_value(Metric* m, MetricFamily* mf) const {
+      m->mutable_gauge()->set_value(value_);
+      mf->set_type(::io::prometheus::client::MetricType::COUNTER);
+    }
+
     HistogramValue::HistogramValue(std::vector<double> const& levels) :
       levels_(add_inf(levels)),
       values_(levels_.size()) {
@@ -70,7 +85,6 @@ namespace prometheus {
       levels_(rhs.levels_),
       values_(rhs.levels_.size()) {
     }
-
 
     HistogramValue::~HistogramValue() {
     }
@@ -95,12 +109,17 @@ namespace prometheus {
       auto v_it = values_.begin();
       while (lvl_it != levels_.end()) {
 	if (v <= *lvl_it) {
-	  double current = v_it->load();
-	  while (!(v_it->compare_exchange_weak(current, current + 1.0)))
+	  uint64_t current = v_it->load();
+	  while (!(v_it->compare_exchange_weak(current, current + 1)))
 	    ;
 	}
 	++lvl_it;
 	++v_it;
+      }
+      {
+	double current = samples_sum_.load();
+	while (!(samples_sum_.compare_exchange_weak(current, current + v)))
+	  ;
       }
     }
 
@@ -117,9 +136,22 @@ namespace prometheus {
       return values_.back().load(std::memory_order_relaxed);
     }
 
+    void HistogramValue::output_proto_value(Metric* m, MetricFamily* mf) const {
+      Histogram* h = m->mutable_histogram();
+      h->set_sample_count(values_.back().load());
+      h->set_sample_sum(samples_sum_);
+      mf->set_type(::io::prometheus::client::MetricType::HISTOGRAM);
+	auto it = values_.begin();
+	for (auto const& l : levels_) {
+	  Bucket* b = h->add_bucket();
+	  b->set_upper_bound(l);
+	  b->set_cumulative_count(it->load());
+	  ++it;
+	}
+    }
+
     const std::string CounterValue::type_ = "counter";
-    const std::string SetGaugeValue::type_ = "gauge";
-    const std::string IncDecGaugeValue::type_ = "gauge";
+    const std::string BaseGaugeValue::type_ = "gauge";
     const std::string HistogramValue::type_ = "histogram";
   }
 }

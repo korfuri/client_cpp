@@ -1,6 +1,7 @@
 #ifndef PROMETHEUS_VALUES_HH__
 #define PROMETHEUS_VALUES_HH__
 
+#include "prometheus/proto/metrics.pb.h"
 #include "output_formatter.hh"
 
 #include <atomic>
@@ -16,6 +17,9 @@ namespace prometheus {
   std::vector<double> histogram_levels_powers_of(double base, double count);
 
   namespace impl {
+
+    using ::io::prometheus::client::Metric;
+    using ::io::prometheus::client::MetricFamily;
 
     class BaseScalarValue {
       // A base class used by the various scalar values (counter and gauges).
@@ -38,24 +42,28 @@ namespace prometheus {
       std::atomic<double> value_;
     };
 
-    class SetGaugeValue : public BaseScalarValue {
-     public:
-      void set(double value) { value_.store(value, std::memory_order_relaxed); }
+    class BaseGaugeValue : public BaseScalarValue {
+    public:
+      void output_proto_value(Metric* m, MetricFamily* mf) const;
 
       const static std::string type_;
     };
 
-    class IncDecGaugeValue : public BaseScalarValue {
+    class SetGaugeValue : public BaseGaugeValue {
+     public:
+      void set(double value) { value_.store(value, std::memory_order_relaxed); }
+    };
+
+    class IncDecGaugeValue : public BaseGaugeValue {
      public:
       void inc(double value = 1.0);
       void dec(double value = 1.0);
-
-      const static std::string type_;
     };
 
     class CounterValue : public BaseScalarValue {
      public:
       void inc(double value = 1.0);
+      void output_proto_value(Metric* m, MetricFamily* mf) const;
 
       const static std::string type_;
     };
@@ -81,11 +89,14 @@ namespace prometheus {
 	}
       }
 
+      void output_proto_value(Metric* m, MetricFamily* mf) const;
+
       const static std::string type_;
 
     private:
       const std::vector<double> levels_;
-      std::vector<std::atomic<double>> values_;
+      std::vector<std::atomic<uint64_t>> values_;
+      std::atomic<double> samples_sum_;
     };
 
   } /* namespace impl */

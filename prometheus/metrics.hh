@@ -1,8 +1,9 @@
 #ifndef PROMETHEUS_METRICS_HH__
 #define PROMETHEUS_METRICS_HH__
 
-#include "util/container_hash.hh"
 #include "output_formatter.hh"
+#include "prometheus/proto/metrics.pb.h"
+#include "util/container_hash.hh"
 #include "util/zipped_iterator.hh"
 
 #include <algorithm>
@@ -16,6 +17,10 @@
 namespace prometheus {
   namespace impl {
 
+    using ::io::prometheus::client::LabelPair;
+    using ::io::prometheus::client::MetricFamily;
+    using ::io::prometheus::client::Metric;
+
     class Registry;
 
     class AbstractMetric {
@@ -24,8 +29,10 @@ namespace prometheus {
       AbstractMetric(const std::string &name, const std::string &help,
                      Registry *reg);
       virtual void output(OutputFormatter &) const = 0;
+      virtual void output_proto(MetricFamily* mf) const = 0;
 
      protected:
+      void output_proto_internal(MetricFamily* mf) const;
       std::string name_;
       std::string help_;
     };
@@ -61,6 +68,24 @@ namespace prometheus {
 	}
       }
 
+      virtual void output_proto(MetricFamily* mf) const {
+	output_proto_internal(mf);
+        std::unique_lock<std::mutex> l(mutex_);
+        for (const auto &it_v : values_) {
+	  Metric* m = mf->add_metric();
+	  auto it_labelname = labelnames_.begin();
+	  auto it_labelvalue = it_v.first.begin();
+	  while (it_labelname != labelnames_.end()) {
+	    LabelPair* l = m->add_label();
+	    l->set_name(*it_labelname);
+	    l->set_value(*it_labelvalue);
+	    ++it_labelname;
+	    ++it_labelvalue;
+	  }
+	  it_v.second.output_proto_value(m, mf);
+	}
+      }
+
      private:
       ValueType default_value_;
       stringarray const labelnames_;
@@ -79,6 +104,11 @@ namespace prometheus {
       virtual void output(OutputFormatter &f) const {
         f.addMetric(name_, help_, ValueType::type_);
 	this->value_output(f, name_);
+      }
+
+      virtual void output_proto(MetricFamily* mf) const {
+	output_proto_internal(mf);
+	this->output_proto_value(mf->add_metric(), mf);
       }
     };
 

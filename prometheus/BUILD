@@ -14,6 +14,7 @@ cc_library(
 cc_library(
     name = "client_lib_impl",
     srcs = [
+        "metrics.cc",
         "output_formatter.cc",
         "registry.cc",
         "values.cc",
@@ -41,7 +42,10 @@ cc_library(
 cc_binary(
     name = "client_demo",
     srcs = ["client_demo_main.cc"],
-    deps = [":client_lib"])
+    deps = [
+        ":client_lib",
+        "@protobuf//:protobuf",
+    ])
 
 cc_test(
     name = "client_test",
