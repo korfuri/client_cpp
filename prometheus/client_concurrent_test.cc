@@ -28,7 +28,7 @@ namespace {
     for (int i = 0; i < kThreads; ++i) {
       l.push_back(std::thread(f_countertest, i));
     }
-    for (auto &t : l) {
+    for (auto& t : l) {
       t.join();
     }
     EXPECT_EQ(kThreads * kIterations, c0.value());
@@ -49,7 +49,7 @@ namespace {
     for (int i = 0; i < kThreads; ++i) {
       l.push_back(std::thread(f_setgaugetest, i));
     }
-    for (auto &t : l) {
+    for (auto& t : l) {
       t.join();
     }
     EXPECT_TRUE(sg0.value() >= 0 && sg0.value() < kThreads);
@@ -66,7 +66,8 @@ namespace {
   IncDecGauge<0> idg0("test_incdec_gauge0", "Test IncDecGauge<0>.");
   IncDecGauge<0> idg_inprogress("test_inprogress", "Test InProgress.");
   IncDecGauge<0> idg0a("test_incdec_gauge0a", "Test IncDecGauge<0>.");
-  IncDecGauge<1> idg1("test_incdec_gauge1", "Test IncDecGauge<1>.", {"threadid"});
+  IncDecGauge<1> idg1("test_incdec_gauge1", "Test IncDecGauge<1>.",
+                      {"threadid"});
 
   void f_incdecgaugetest(int threadid) {
     std::string id = std::to_string(threadid);
@@ -86,7 +87,7 @@ namespace {
       EXPECT_EQ(0, idg1.labels({std::to_string(i)}).value());
       l.push_back(std::thread(f_incdecgaugetest, i));
     }
-    for (auto &t : l) {
+    for (auto& t : l) {
       t.join();
     }
     EXPECT_EQ(0, idg0.value());

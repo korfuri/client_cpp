@@ -158,7 +158,9 @@ namespace {
   }
 
   TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
-    EXPECT_THROW(new Histogram<0>("test", "test", histogram_levels({3,2,1,0})), err::UnsortedLevelsException);
+    EXPECT_THROW(
+        new Histogram<0>("test", "test", histogram_levels({3, 2, 1, 0})),
+        err::UnsortedLevelsException);
   }
 
   TEST_F(ClientCPPTest, HistogramLevelsTest) {

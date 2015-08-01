@@ -33,10 +33,11 @@ namespace prometheus {
   };
 
   class InProgress {
-  public:
+   public:
     InProgress(impl::IncDecGaugeValue& g, double value = 1.0);
     ~InProgress();
-  private:
+
+   private:
     InProgress(InProgress const&) = delete;
     InProgress(InProgress&&) = delete;
     InProgress& operator=(InProgress const&) = delete;

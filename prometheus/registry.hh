@@ -15,12 +15,12 @@ namespace prometheus {
 
     class Registry {
      public:
-      void register_metric(AbstractMetric *metric);
-      void output(std::ostream &os) const;
+      void register_metric(AbstractMetric* metric);
+      void output(std::ostream& os) const;
       std::vector<MetricFamily*> output_proto() const;
 
      private:
-      std::vector<AbstractMetric *> metrics_;
+      std::vector<AbstractMetric*> metrics_;
       mutable std::mutex mutex_;
     };
 
