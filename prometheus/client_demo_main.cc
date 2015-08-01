@@ -42,8 +42,7 @@ int main() {
   blups_by_blip_blop.labels({"a", "c"}).record(10);
   blups_by_blip_blop.labels({"e", "d"}).record(10000000);
 
-  Counter<1> unicode(u8"üñíçøđè-metric",
-                     u8"This metric tests üñíçøđè support",
+  Counter<1> unicode(u8"üñíçøđè-metric", u8"This metric tests üñíçøđè support",
                      {u8"lábel"});
   unicode.labels({u8"valüe"}).inc();
   unicode.labels({u8"🍌"}).inc(2);

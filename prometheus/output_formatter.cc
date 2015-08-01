@@ -5,6 +5,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <unicode/unistr.h>
+
 namespace prometheus {
   namespace impl {
 
@@ -177,8 +179,11 @@ namespace prometheus {
     }
 
     std::string escape_help(std::string const& s) {
-      // TODO(korfuri): Escape this properly.
-      return s;
+      icu::UnicodeString us = icu::UnicodeString::fromUTF8(s);
+      us.findAndReplace("\\", "\\\\").findAndReplace("\n", "\\n");
+      std::string replaced_s;
+      us.toUTF8String(replaced_s);
+      return replaced_s;
     }
 
     std::string escape_label_name(std::string const& s) {
@@ -187,7 +192,13 @@ namespace prometheus {
     }
 
     std::string escape_label_value(std::string const& s) {
-      return std::string("\"") + s + "\"";
+      icu::UnicodeString us = icu::UnicodeString::fromUTF8(s);
+      us.findAndReplace("\\", "\\\\")
+          .findAndReplace("\"", "\\\"")
+          .findAndReplace("\n", "\\n");
+      std::string replaced_s;
+      us.toUTF8String(replaced_s);
+      return std::string("\"") + replaced_s + "\"";
     }
 
     std::string escape_double(double d) {

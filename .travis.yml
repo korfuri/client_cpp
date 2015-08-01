@@ -5,6 +5,8 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
+      # We need a system-wide libicu
+      - libicu-dev
       # Package list from http://bazel.io/docs/install.html
       - openjdk-7-jdk
       - openjdk-7-source

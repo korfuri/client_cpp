@@ -171,4 +171,31 @@ namespace {
         &mf));
     EXPECT_THROW(metricfamily_proto_to_string(&mf), OutputFormatterException);
   }
+
+  TEST_F(OutputFormatterTest, LabelValueEscaping) {
+    EXPECT_EQ("\"abcd\"", escape_label_value("abcd"));
+    EXPECT_EQ("\"a\\\\b\\\"c\\nd\"", escape_label_value("a\\b\"c\nd"));
+  }
+
+  TEST_F(OutputFormatterTest, LabelValueUnicodeEscaping) {
+    // "  is u+0022, 丢 is u+4e22
+    // \  is u+005c, 乜 is u+4e5c
+    // \n is u+000a, 上 is u+4e0a
+    EXPECT_EQ(u8"\"丢乜上x\"", escape_label_value(u8"丢乜上x"));
+    EXPECT_EQ(u8"\"丢\\\\乜\\\"上\\nx\"",
+              escape_label_value(u8"丢\\乜\"上\nx"));
+  }
+
+  TEST_F(OutputFormatterTest, HelpTextEscaping) {
+    EXPECT_EQ("abcd", escape_help("abcd"));
+    EXPECT_EQ("a\\\\b\"c\\nd", escape_help("a\\b\"c\nd"));
+  }
+
+  TEST_F(OutputFormatterTest, HelpTextUnicodeEscaping) {
+    // "  is u+0022, 丢 is u+4e22
+    // \  is u+005c, 乜 is u+4e5c
+    // \n is u+000a, 上 is u+4e0a
+    EXPECT_EQ(u8"丢乜上x", escape_help(u8"丢乜上x"));
+    EXPECT_EQ(u8"丢\\\\乜\"上\\nx", escape_help(u8"丢\\乜\"上\nx"));
+  }
 }

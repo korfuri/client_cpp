@@ -15,12 +15,10 @@ cc_library(
     name = "client_lib_impl",
     srcs = [
         "metrics.cc",
-        "output_formatter.cc",
         "registry.cc",
         "values.cc",
     ],
     hdrs = [
-        "output_formatter.hh",
         "metrics.hh",
         "registry.hh",
         "values.hh",
@@ -34,6 +32,19 @@ cc_library(
     ])
 
 cc_library(
+    name = "output_formatter_lib",
+    srcs = ["output_formatter.cc"],
+    hdrs = ["output_formatter.hh"],
+    deps = [
+        # "@icu//:icu",
+        "//prometheus/proto:metrics_proto",
+    ],
+    copts = [
+        "-Iexternal/icu/icu/source/common",
+        "-Iexternal/icu/icu/source/i18n",
+    ])
+
+cc_library(
     name = "client_exceptions_lib",
     srcs = ["exceptions.cc"],
     hdrs = ["exceptions.hh"],
@@ -44,6 +55,7 @@ cc_binary(
     srcs = ["client_demo_main.cc"],
     deps = [
         ":client_lib",
+        ":output_formatter_lib",
         "@protobuf//:protobuf",
     ])
 
@@ -82,7 +94,7 @@ cc_test(
     name = "output_formatter_test",
     srcs = ["output_formatter_test.cc"],
     deps = [
-        ":client_lib",
+        ":output_formatter_lib",
         "@gtest//gtest:gtest",
         "@gtest//gtest:gtest_main",
     ],

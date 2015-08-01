@@ -103,6 +103,14 @@ toolchain {
   # linker_flag: "-Wl,--warn-execstack"
   # linker_flag: "-Wl,--detect-odr-violations"
 
+  # We need ICU and there is no support to build it with Bazel yet. So
+  # here it goes.
+  cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu"
+  linker_flag: "-licuio"
+  linker_flag: "-licui18n"
+  linker_flag: "-licuuc"
+  linker_flag: "-licudata"
+
   compilation_mode_flags {
     mode: DBG
     # Enable debug symbols.
