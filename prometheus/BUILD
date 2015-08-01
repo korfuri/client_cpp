@@ -53,6 +53,7 @@ cc_test(
     deps = [
         ":client_lib",
         "@gtest//gtest:gtest",
+        "@gtest//gtest:gtest_main",
     ],
     size = "small",
     timeout = "short")
@@ -63,6 +64,7 @@ cc_test(
     deps = [
         ":client_lib",
         "@gtest//gtest:gtest",
+        "@gtest//gtest:gtest_main",
     ],
     size = "small")
 

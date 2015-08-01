@@ -170,8 +170,3 @@ namespace {
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, -8));
   }
 } /* namespace */
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
