@@ -37,12 +37,7 @@ cc_library(
     srcs = ["output_formatter.cc"],
     hdrs = ["output_formatter.hh"],
     deps = [
-        # "@icu//:icu",
         "//prometheus/proto:metrics_proto",
-    ],
-    copts = [
-        "-Iexternal/icu/icu/source/common",
-        "-Iexternal/icu/icu/source/i18n",
     ])
 
 cc_library(
