@@ -3,34 +3,28 @@ package(
 
 cc_library(
     name = "client_lib",
-    srcs = ["client.cc"],
-    hdrs = ["client.hh"],
-    deps = [
-        ":client_lib_impl",
-        ":client_exceptions_lib",
-    ],
-    visibility = ["//visibility:public"])
-
-cc_library(
-    name = "client_lib_impl",
     srcs = [
+        "client.cc",
+        "exceptions.cc",
         "metrics.cc",
+        "metrics.hh",
         "registry.cc",
+        "registry.hh",
         "values.cc",
+        "values.hh",
     ],
     hdrs = [
-        "metrics.hh",
-        "registry.hh",
-        "values.hh",
+        "client.hh",
+        "exceptions.hh",
     ],
     deps = [
         "//prometheus/proto:stubs",
         "//prometheus/proto:metrics_proto",
-        ":client_exceptions_lib",
         "//prometheus/util:container_hash_lib",
         "//prometheus/util:extend_array_lib",
         "//prometheus/util:zipped_iterator_lib",
-    ])
+    ],
+    visibility = ["//visibility:public"])
 
 cc_library(
     name = "output_formatter_lib",
@@ -39,12 +33,6 @@ cc_library(
     deps = [
         "//prometheus/proto:metrics_proto",
     ])
-
-cc_library(
-    name = "client_exceptions_lib",
-    srcs = ["exceptions.cc"],
-    hdrs = ["exceptions.hh"],
-    visibility = ["//visibility:public"])
 
 cc_binary(
     name = "client_demo",
