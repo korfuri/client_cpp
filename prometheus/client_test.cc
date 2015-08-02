@@ -101,13 +101,6 @@ namespace {
                    histogram_levels({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
   Histogram<1> h1("test_histogram1", "test Histogram<1>", {{"x"}});
 
-  // TEST_F(ClientCPPTest, LevelUpTest) {
-  //   EXPECT_EQ("1.000000", h0a.level_up(0.9));
-  //   EXPECT_EQ("1.000000", h0a.level_up(1));
-  //   EXPECT_EQ("2.000000", h0a.level_up(1.1));
-  //   EXPECT_EQ("+Inf", h0a.level_up(11));
-  // }
-
   TEST_F(ClientCPPTest, UnlabelledHistogramTest) {
     h0.record(1.5);
     h0.record(7.5);
