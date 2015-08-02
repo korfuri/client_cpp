@@ -1,3 +1,4 @@
+/* -*- mode: C++; coding: utf-8-unix -*- */
 #include "client.hh"
 #include <string>
 #include <gtest/gtest.h>
@@ -171,4 +172,38 @@ namespace {
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, 0));
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, -8));
   }
+
+  TEST_F(ClientCPPTest, BadMetricNamesTest) {
+    EXPECT_THROW(new Counter<0>("", ""),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("dashed-name", ""),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("dashed-name", ""),
+		 err::InvalidNameException);
+    EXPECT_NO_THROW(new Counter<0>("_underscore_prefix", ""));
+    EXPECT_THROW(new Counter<0>("__reserved_prefix", ""),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("bad_+_char", ""),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>(u8"üñíçøđè", ""),
+		 err::InvalidNameException);
+  }
+
+  TEST_F(ClientCPPTest, BadLabelNamesTest) {
+    EXPECT_THROW(new Counter<1>("a", "", {""}),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<1>("a", "", {"dashed-name"}),
+		 err::InvalidNameException);
+    EXPECT_NO_THROW(new Counter<1>("a", "", {"underscore_name"}));
+    EXPECT_THROW(new Counter<1>("a", "", {"bad_+_char"}),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<1>("a", "", {u8"üñíçøđè"}),
+		 err::InvalidNameException);
+    // Reserved names
+    EXPECT_THROW(new Counter<1>("a", "", {"le"}),
+		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<1>("a", "", {"quantile"}),
+		 err::InvalidNameException);
+  }
+
 } /* namespace */

@@ -57,7 +57,9 @@ namespace prometheus {
             labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
         for (auto const& l : labelnames_) {
-          if (!std::regex_match(l, label_name_re)) {
+	  if (l == "le" ||
+	      l == "quantile" ||
+	      !std::regex_match(l, label_name_re)) {
             throw err::InvalidNameException();
           }
         }
