@@ -97,4 +97,36 @@ namespace {
       EXPECT_EQ(0, idg1.labels({std::to_string(i)}).value());
     }
   }
+
+  Histogram<1> h1("test_histogram1", "Test Histogram<1>",
+		  {"threadgroup"});
+  Histogram<1> h1a("test_histogram1a", "Test Histogram<1>",
+		   {"x"}, histogram_levels({5, 10, 15, 20, 25, 30, 40, 50, 60, 100}));
+
+  void f_histogramtest(int threadid) {
+    std::string threadgroup = std::to_string(threadid % 4);
+    for (int i = 0; i < kIterations; ++i) {
+      h1.labels({threadgroup}).record((double)i / 1000.0);
+      h1a.labels({std::to_string(i)}).record(threadid);
+    }
+  }
+
+  TEST_F(ClientConcurrentTest, HistogramTest) {
+    std::list<std::thread> l;
+    for (int i = 0; i < kThreads; ++i) {
+      l.push_back(std::thread(f_histogramtest, i));
+    }
+    for (auto& t : l) {
+      t.join();
+    }
+    EXPECT_EQ(kIterations * kThreads / 4, h1.labels({"0"}).value());
+    EXPECT_EQ(kIterations * kThreads / 4, h1.labels({"1"}).value());
+    EXPECT_EQ(kIterations * kThreads / 4, h1.labels({"2"}).value());
+    EXPECT_EQ(kIterations * kThreads / 4, h1.labels({"3"}).value());
+    EXPECT_EQ(0, h1.labels({"4"}).value());
+    for (int i = 0; i < kIterations; ++i) {
+      EXPECT_EQ(11, h1a.labels({std::to_string(i)}).value(10));
+      EXPECT_EQ(kThreads, h1a.labels({std::to_string(i)}).value());
+    }
+  }
 }
