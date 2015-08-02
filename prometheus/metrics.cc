@@ -9,7 +9,8 @@ namespace prometheus {
   namespace impl {
 
     const std::regex label_name_re("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-    const std::regex metric_name_re("^((_[a-zA-Z0-9:])|[a-zA-Z:])[a-zA-Z0-9_:]*$");
+    const std::regex metric_name_re(
+        "^((_[a-zA-Z0-9:])|[a-zA-Z:])[a-zA-Z0-9_:]*$");
 
     using ::io::prometheus::client::MetricFamily;
 

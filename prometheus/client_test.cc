@@ -174,36 +174,29 @@ namespace {
   }
 
   TEST_F(ClientCPPTest, BadMetricNamesTest) {
-    EXPECT_THROW(new Counter<0>("", ""),
-		 err::InvalidNameException);
-    EXPECT_THROW(new Counter<0>("dashed-name", ""),
-		 err::InvalidNameException);
-    EXPECT_THROW(new Counter<0>("dashed-name", ""),
-		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("", ""), err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("dashed-name", ""), err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("dashed-name", ""), err::InvalidNameException);
     EXPECT_NO_THROW(new Counter<0>("_underscore_prefix", ""));
     EXPECT_THROW(new Counter<0>("__reserved_prefix", ""),
-		 err::InvalidNameException);
-    EXPECT_THROW(new Counter<0>("bad_+_char", ""),
-		 err::InvalidNameException);
-    EXPECT_THROW(new Counter<0>(u8"üñíçøđè", ""),
-		 err::InvalidNameException);
+                 err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>("bad_+_char", ""), err::InvalidNameException);
+    EXPECT_THROW(new Counter<0>(u8"üñíçøđè", ""), err::InvalidNameException);
   }
 
   TEST_F(ClientCPPTest, BadLabelNamesTest) {
-    EXPECT_THROW(new Counter<1>("a", "", {""}),
-		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<1>("a", "", {""}), err::InvalidNameException);
     EXPECT_THROW(new Counter<1>("a", "", {"dashed-name"}),
-		 err::InvalidNameException);
+                 err::InvalidNameException);
     EXPECT_NO_THROW(new Counter<1>("a", "", {"underscore_name"}));
     EXPECT_THROW(new Counter<1>("a", "", {"bad_+_char"}),
-		 err::InvalidNameException);
+                 err::InvalidNameException);
     EXPECT_THROW(new Counter<1>("a", "", {u8"üñíçøđè"}),
-		 err::InvalidNameException);
+                 err::InvalidNameException);
     // Reserved names
-    EXPECT_THROW(new Counter<1>("a", "", {"le"}),
-		 err::InvalidNameException);
+    EXPECT_THROW(new Counter<1>("a", "", {"le"}), err::InvalidNameException);
     EXPECT_THROW(new Counter<1>("a", "", {"quantile"}),
-		 err::InvalidNameException);
+                 err::InvalidNameException);
   }
 
 } /* namespace */
