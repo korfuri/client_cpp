@@ -1,4 +1,4 @@
-# -*- mode: C++; coding: utf-8-unix -*-
+# -*- mode: text; coding: utf-8-unix -*-
 # HELP blips_total Total number of blips.
 # TYPE blips_total gauge
 blips_total = 4.2
