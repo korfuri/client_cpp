@@ -5,6 +5,7 @@
 #include "output_formatter.hh"
 
 #include <atomic>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -82,9 +83,10 @@ namespace prometheus {
       const static std::string type_;
 
      private:
+      mutable std::mutex mutex_;
       const std::vector<double> levels_;
-      std::vector<std::atomic<uint64_t>> values_;
-      std::atomic<double> samples_sum_;
+      std::vector<uint64_t> values_;
+      double samples_sum_;
     };
 
   } /* namespace impl */

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <limits>
+#include <mutex>
 #include <utility>
 #include <vector>
 
@@ -84,9 +85,12 @@ namespace prometheus {
 
     HistogramValue::~HistogramValue() {}
 
-    bool HistogramValue::is_posinf(double d) { return std::isinf(d) && d > 0; }
+    /* static */ bool HistogramValue::is_posinf(double d) {
+      return std::isinf(d) && d > 0;
+    }
 
-    std::vector<double> HistogramValue::add_inf(std::vector<double> const& in) {
+    /* static */ std::vector<double> HistogramValue::add_inf(
+        std::vector<double> const& in) {
       if (is_posinf(in.back())) {
         return in;
       } else {
@@ -100,46 +104,49 @@ namespace prometheus {
     void HistogramValue::record(double v) {
       auto lvl_it = levels_.begin();
       auto v_it = values_.begin();
-      while (lvl_it != levels_.end()) {
-        if (v <= *lvl_it) {
-          uint64_t current = v_it->load();
-          while (!(v_it->compare_exchange_weak(current, current + 1)))
-            ;
-        }
-        ++lvl_it;
-        ++v_it;
-      }
       {
-        double current = samples_sum_.load();
-        while (!(samples_sum_.compare_exchange_weak(current, current + v)))
-          ;
+        std::lock_guard<std::mutex> l(mutex_);
+        while (lvl_it != levels_.end()) {
+          if (v <= *lvl_it) {
+            *v_it += 1;
+          }
+          ++lvl_it;
+          ++v_it;
+        }
+        samples_sum_ += v;
       }
     }
 
     double HistogramValue::value(double d) const {
       auto lvl_it = levels_.begin();
       auto v_it = values_.begin();
-      while (lvl_it != levels_.end()) {
-        if (d <= *lvl_it) {
-          return v_it->load(std::memory_order_relaxed);
+      {
+        std::lock_guard<std::mutex> l(mutex_);
+        while (lvl_it != levels_.end()) {
+          if (d <= *lvl_it) {
+            return *v_it;
+          }
+          ++lvl_it;
+          ++v_it;
         }
-        ++lvl_it;
-        ++v_it;
+        return values_.back();
       }
-      return values_.back().load(std::memory_order_relaxed);
     }
 
     void HistogramValue::output_proto_value(Metric* m, MetricFamily* mf) const {
       Histogram* h = m->mutable_histogram();
-      h->set_sample_count(values_.back().load());
-      h->set_sample_sum(samples_sum_);
       mf->set_type(::io::prometheus::client::MetricType::HISTOGRAM);
       auto it = values_.begin();
-      for (auto const& l : levels_) {
-        Bucket* b = h->add_bucket();
-        b->set_upper_bound(l);
-        b->set_cumulative_count(it->load());
-        ++it;
+      {
+        std::lock_guard<std::mutex> l(mutex_);
+        h->set_sample_count(values_.back());
+        h->set_sample_sum(samples_sum_);
+        for (auto const& l : levels_) {
+          Bucket* b = h->add_bucket();
+          b->set_upper_bound(l);
+          b->set_cumulative_count(*it);
+          ++it;
+        }
       }
     }
 
