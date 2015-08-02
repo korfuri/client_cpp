@@ -2,7 +2,7 @@ package(
     default_visibility = ["//visibility:private"])
 
 cc_library(
-    name = "client_lib",
+    name = "prometheus_client_lib",
     srcs = [
         "client.cc",
         "exceptions.cc",
@@ -27,7 +27,7 @@ cc_library(
     visibility = ["//visibility:public"])
 
 cc_library(
-    name = "output_formatter_lib",
+    name = "prometheus_output_formatter_lib",
     srcs = ["output_formatter.cc"],
     hdrs = ["output_formatter.hh"],
     deps = [
@@ -38,8 +38,8 @@ cc_binary(
     name = "client_demo",
     srcs = ["client_demo_main.cc"],
     deps = [
-        ":client_lib",
-        ":output_formatter_lib",
+        ":prometheus_client_lib",
+        ":prometheus_output_formatter_lib",
         "@protobuf//:protobuf",
     ])
 
@@ -47,7 +47,7 @@ cc_test(
     name = "client_test",
     srcs = ["client_test.cc"],
     deps = [
-        ":client_lib",
+        ":prometheus_client_lib",
         "@gtest//gtest:gtest",
         "@gtest//gtest:gtest_main",
     ],
@@ -58,7 +58,7 @@ cc_test(
     name = "client_concurrent_test",
     srcs = ["client_concurrent_test.cc"],
     deps = [
-        ":client_lib",
+        ":prometheus_client_lib",
         "@gtest//gtest:gtest",
         "@gtest//gtest:gtest_main",
     ],
@@ -78,7 +78,7 @@ cc_test(
     name = "output_formatter_test",
     srcs = ["output_formatter_test.cc"],
     deps = [
-        ":output_formatter_lib",
+        ":prometheus_output_formatter_lib",
         "@gtest//gtest:gtest",
         "@gtest//gtest:gtest_main",
     ],
