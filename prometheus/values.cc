@@ -150,9 +150,5 @@ namespace prometheus {
         }
       }
     }
-
-    const std::string CounterValue::type_ = "counter";
-    const std::string BaseGaugeValue::type_ = "gauge";
-    const std::string HistogramValue::type_ = "histogram";
   }
 }

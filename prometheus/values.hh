@@ -41,8 +41,6 @@ namespace prometheus {
     class BaseGaugeValue : public BaseScalarValue {
      public:
       void output_proto_value(Metric* m, MetricFamily* mf) const;
-
-      const static std::string type_;
     };
 
     class SetGaugeValue : public BaseGaugeValue {
@@ -60,8 +58,6 @@ namespace prometheus {
      public:
       void inc(double value = 1.0);
       void output_proto_value(Metric* m, MetricFamily* mf) const;
-
-      const static std::string type_;
     };
 
     class HistogramValue {
@@ -78,8 +74,6 @@ namespace prometheus {
       double value(double threshold = kInf) const;
 
       void output_proto_value(Metric* m, MetricFamily* mf) const;
-
-      const static std::string type_;
 
      private:
       mutable std::mutex mutex_;
