@@ -10,5 +10,9 @@ namespace prometheus {
     const char* UnsortedLevelsException::what() const noexcept {
       return "unsorted_levels";
     }
+
+    const char* InvalidNameException::what() const noexcept {
+      return "invalid_name";
+    }
   }
 }

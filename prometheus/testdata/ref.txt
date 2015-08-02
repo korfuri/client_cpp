@@ -55,7 +55,7 @@ blups_by_blip_blop{blip="e",blop="d",le="100"} = 0
 blups_by_blip_blop{blip="e",blop="d",le="1000"} = 0
 blups_by_blip_blop{blip="e",blop="d",le="10000"} = 0
 blups_by_blip_blop{blip="e",blop="d",le="+Inf"} = 1
-# HELP üñíçøđè-metric This metric tests üñíçøđè support
-# TYPE üñíçøđè-metric counter
-üñíçøđè-metric{lábel="valüe"} = 1
-üñíçøđè-metric{lábel="🍌"} = 2
+# HELP unicode_metric This metric tests üñíçøđè support
+# TYPE unicode_metric counter
+unicode_metric{label="valüe"} = 1
+unicode_metric{label="🍌"} = 2

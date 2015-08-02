@@ -6,6 +6,11 @@
 namespace prometheus {
   namespace err {
 
+    class InvalidNameException : public std::exception {
+      // A metric or a label was created with an invalid name.
+      virtual const char* what() const noexcept;
+    };
+
     class NegativeCounterIncrementException : public std::exception {
       // A Counter was incremented (inc()) with a negative value.
       // Counters can never be decremented: to decrement a value, use

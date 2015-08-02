@@ -1,6 +1,7 @@
 #ifndef PROMETHEUS_METRICS_HH__
 #define PROMETHEUS_METRICS_HH__
 
+#include "exceptions.hh"
 #include "output_formatter.hh"
 #include "prometheus/proto/metrics.pb.h"
 #include "util/container_hash.hh"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <mutex>
+#include <regex>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -20,6 +22,9 @@ namespace prometheus {
     using ::io::prometheus::client::LabelPair;
     using ::io::prometheus::client::MetricFamily;
     using ::io::prometheus::client::Metric;
+
+    extern const std::regex label_name_re;
+    extern const std::regex metric_name_re;
 
     class Registry;
 
@@ -51,6 +56,11 @@ namespace prometheus {
             default_value_(va...),
             labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
+        for (auto const& l : labelnames_) {
+          if (!std::regex_match(l, label_name_re)) {
+            throw err::InvalidNameException();
+          }
+        }
       }
 
       ValueType& labels(stringarray const& labelvalues) {

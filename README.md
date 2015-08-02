@@ -7,7 +7,8 @@ me](mailto:korfuri@gmail.com) first to discuss your idea.
 
 # Dependencies
 
-[Bazel](http://bazel.io)
+  * [Bazel](http://bazel.io)
+  * `apt-get install g++ 4.9 libicu-dev`
 
 The workspace will pull:
   * gtest

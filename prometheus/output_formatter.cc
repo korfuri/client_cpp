@@ -174,7 +174,8 @@ namespace prometheus {
     }
 
     std::string escape_metric_name(std::string const& s) {
-      // TODO(korfuri): Escape this properly.
+      // Assume metric names don't need escaping as they are
+      // restricted to only a few characters.
       return s;
     }
 
@@ -187,7 +188,8 @@ namespace prometheus {
     }
 
     std::string escape_label_name(std::string const& s) {
-      // TODO(korfuri): Escape this properly.
+      // Assume label names don't need escaping as they are
+      // restricted to only a few characters.
       return s;
     }
 
