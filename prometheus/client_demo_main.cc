@@ -1,5 +1,6 @@
 /* -*- mode: C++; coding: utf-8-unix -*- */
 #include "client.hh"
+#include "output_formatter.hh"
 
 #include <iostream>
 

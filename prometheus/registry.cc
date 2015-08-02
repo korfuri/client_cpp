@@ -1,5 +1,6 @@
 #include "registry.hh"
 #include "output_formatter.hh"
+#include "prometheus/proto/metrics.pb.h"
 
 #include <mutex>
 

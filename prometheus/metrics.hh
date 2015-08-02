@@ -2,8 +2,7 @@
 #define PROMETHEUS_METRICS_HH__
 
 #include "exceptions.hh"
-#include "output_formatter.hh"
-#include "prometheus/proto/metrics.pb.h"
+#include "proto/stubs.hh"
 #include "util/container_hash.hh"
 #include "util/zipped_iterator.hh"
 
@@ -37,6 +36,13 @@ namespace prometheus {
 
      protected:
       void output_proto_internal(MetricFamily* mf) const;
+
+      // These static methods wrap operations on protobuf objects so
+      // the header only needs a forward declaration of the classes.
+      static Metric* add_metric(MetricFamily* mf);
+      static LabelPair* add_label(Metric* m);
+      static void set_label(LabelPair* l, std::string const& name, std::string const& value);
+
       std::string name_;
       std::string help_;
     };
@@ -74,13 +80,12 @@ namespace prometheus {
         output_proto_internal(mf);
         std::unique_lock<std::mutex> l(mutex_);
         for (const auto& it_v : values_) {
-          Metric* m = mf->add_metric();
+          Metric* m = add_metric(mf);
           auto it_labelname = labelnames_.begin();
           auto it_labelvalue = it_v.first.begin();
           while (it_labelname != labelnames_.end()) {
-            LabelPair* l = m->add_label();
-            l->set_name(*it_labelname);
-            l->set_value(*it_labelvalue);
+            LabelPair* l = add_label(m);
+            set_label(l, *it_labelname, *it_labelvalue);
             ++it_labelname;
             ++it_labelvalue;
           }
@@ -105,7 +110,7 @@ namespace prometheus {
 
       virtual void output_proto(MetricFamily* mf) const {
         output_proto_internal(mf);
-        this->output_proto_value(mf->add_metric(), mf);
+        this->output_proto_value(add_metric(mf), mf);
       }
     };
 

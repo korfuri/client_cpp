@@ -2,7 +2,7 @@
 #define PROMETHEUS_REGISTRY_HH__
 
 #include "metrics.hh"
-#include "prometheus/proto/metrics.pb.h"
+#include "proto/stubs.hh"
 
 #include <ostream>
 #include <mutex>

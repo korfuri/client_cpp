@@ -24,6 +24,7 @@ cc_library(
         "values.hh",
     ],
     deps = [
+        "//prometheus/proto:stubs",
         "//prometheus/proto:metrics_proto",
         ":client_exceptions_lib",
         "//prometheus/util:container_hash_lib",

@@ -1,5 +1,6 @@
 #include "exceptions.hh"
 #include "values.hh"
+#include "prometheus/proto/metrics.pb.h"
 
 #include <cmath>
 #include <stdexcept>

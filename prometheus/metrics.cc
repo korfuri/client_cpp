@@ -33,5 +33,16 @@ namespace prometheus {
       mf->set_help(help_);
     }
 
+    /* static */ Metric* AbstractMetric::add_metric(MetricFamily* mf) {
+      return mf->add_metric();
+    }
+    /* static */ LabelPair* AbstractMetric::add_label(Metric* m) {
+      return m->add_label();
+    }
+    /* static */ void AbstractMetric::set_label(LabelPair* l, std::string const& name, std::string const& value) {
+      l->set_name(name);
+      l->set_value(value);
+    }
+
   } /* namespace impl */
 } /* namespace prometheus */

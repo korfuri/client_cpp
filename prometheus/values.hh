@@ -1,8 +1,7 @@
 #ifndef PROMETHEUS_VALUES_HH__
 #define PROMETHEUS_VALUES_HH__
 
-#include "prometheus/proto/metrics.pb.h"
-#include "output_formatter.hh"
+#include "proto/stubs.hh"
 
 #include <atomic>
 #include <mutex>

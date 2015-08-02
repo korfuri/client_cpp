@@ -1,3 +1,4 @@
+#include "prometheus/proto/metrics.pb.h"
 #include "output_formatter.hh"
 
 #include <cmath>
@@ -14,6 +15,25 @@ namespace prometheus {
     using ::io::prometheus::client::Histogram;
     using ::io::prometheus::client::LabelPair;
     using ::io::prometheus::client::Metric;
+    using ::io::prometheus::client::MetricType;
+
+    static std::string escape_type(MetricType const& t) {
+      switch (t) {
+        case MetricType::COUNTER:
+          return "counter";
+        case MetricType::GAUGE:
+          return "gauge";
+        case MetricType::SUMMARY:
+          return "summary";
+        case MetricType::HISTOGRAM:
+          return "histogram";
+        case MetricType::UNTYPED:
+          return "untyped";
+        default:
+          throw OutputFormatterException(
+              OutputFormatterException::kInvalidMetricType);
+      }
+    }
 
     void metric_labels_proto_to_ostream(Metric const& m, std::ostream& ss) {
       for (int i = 0; i < m.label_size(); ++i) {
@@ -153,24 +173,6 @@ namespace prometheus {
         metric_proto_to_ostream(escaped_name, m, *mf, ss);
       }
       return ss.str();
-    }
-
-    std::string escape_type(MetricType const& t) {
-      switch (t) {
-        case MetricType::COUNTER:
-          return "counter";
-        case MetricType::GAUGE:
-          return "gauge";
-        case MetricType::SUMMARY:
-          return "summary";
-        case MetricType::HISTOGRAM:
-          return "histogram";
-        case MetricType::UNTYPED:
-          return "untyped";
-        default:
-          throw OutputFormatterException(
-              OutputFormatterException::kInvalidMetricType);
-      }
     }
 
     std::string escape_metric_name(std::string const& s) {

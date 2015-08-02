@@ -4,7 +4,6 @@
 #include "exceptions.hh"
 #include "metrics.hh"
 #include "registry.hh"
-#include "output_formatter.hh"
 #include "util/extend_array.hh"
 #include "values.hh"
 
