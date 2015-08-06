@@ -1,5 +1,7 @@
 /* -*- mode: C++; coding: utf-8-unix -*- */
 #include "client.hh"
+#include "utils.hh"
+#include "external/fake_clock/fake_clock.hh"
 #include <string>
 #include <gtest/gtest.h>
 
@@ -190,6 +192,42 @@ namespace {
     EXPECT_THROW(new Counter<1>("a", "", {"le"}), err::InvalidNameException);
     EXPECT_THROW(new Counter<1>("a", "", {"quantile"}),
                  err::InvalidNameException);
+  }
+
+  Histogram<0> histogram_elapsed_time("elapsed_time_ms", "",
+                                      histogram_levels_powers_of(10, 10));
+
+  TEST_F(ClientCPPTest, IntervalAccumulatorTest) {
+    EXPECT_EQ(0, histogram_elapsed_time.value());
+    { IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time); }
+    EXPECT_EQ(1, histogram_elapsed_time.value(0));
+
+    {
+      IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time);
+      testing::fake_clock::advance(std::chrono::milliseconds(10));
+    }
+
+    EXPECT_EQ(1, histogram_elapsed_time.value(0));
+    EXPECT_EQ(2, histogram_elapsed_time.value(10));
+
+    {
+      IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time);
+      testing::fake_clock::advance(std::chrono::seconds(10));
+    }
+
+    EXPECT_EQ(1, histogram_elapsed_time.value(0));
+    EXPECT_EQ(2, histogram_elapsed_time.value(10));
+    EXPECT_EQ(3, histogram_elapsed_time.value(10000));
+
+    {
+      IntervalAccumulator<testing::fake_clock, std::chrono::seconds> _(
+          histogram_elapsed_time);
+      testing::fake_clock::advance(std::chrono::seconds(10));
+    }
+
+    EXPECT_EQ(1, histogram_elapsed_time.value(0));
+    EXPECT_EQ(3, histogram_elapsed_time.value(10));
+    EXPECT_EQ(4, histogram_elapsed_time.value(10000));
   }
 
 } /* namespace */

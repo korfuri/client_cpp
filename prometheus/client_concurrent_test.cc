@@ -1,4 +1,5 @@
 #include "client.hh"
+#include "utils.hh"
 #include <gtest/gtest.h>
 #include <list>
 #include <string>

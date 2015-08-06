@@ -4,18 +4,19 @@ package(
 cc_library(
     name = "prometheus_client_lib",
     srcs = [
-        "client.cc",
         "exceptions.cc",
         "metrics.cc",
         "metrics.hh",
         "registry.cc",
         "registry.hh",
+	"utils.cc",
         "values.cc",
         "values.hh",
     ],
     hdrs = [
         "client.hh",
         "exceptions.hh",
+	"utils.hh",
     ],
     deps = [
         "//prometheus/proto:stubs",
@@ -48,7 +49,7 @@ cc_test(
     srcs = ["client_test.cc"],
     deps = [
         ":prometheus_client_lib",
-        "@gtest//gtest:gtest",
+        "@fake_clock//:fake_clock_lib",
         "@gtest//gtest:gtest_main",
     ],
     size = "small",
