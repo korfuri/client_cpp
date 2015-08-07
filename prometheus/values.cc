@@ -21,12 +21,16 @@ namespace prometheus {
       histogram_levels({.005, .01, .025, .05, .075, .1, .25, .5, .75, 1.0, 2.5,
                         5.0, 7.5, 10.0, kInf});
 
-  std::vector<double> histogram_levels_powers_of(double base, double count) {
+  std::vector<double> histogram_levels_powers_of(double base, int count,
+						 double starting_exponent) {
     std::vector<double> v(count + 2);
     if (count <= 0) {
       throw std::logic_error("invalid count of histogram buckets");
     }
-    double exp = 0.0;
+    if (base <= 0) {
+      throw std::logic_error("base must be a positive number");
+    }
+    double exp = starting_exponent;
     v[0] = 0.0;
     for (auto it = v.begin() + 1; it != v.end(); ++it) {
       *it = pow(base, exp);

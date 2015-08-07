@@ -1,4 +1,8 @@
 /* -*- mode: C++; coding: utf-8-unix -*- */
+
+// This is a test of all basic functionalities of the C++ Prometheus
+// client library.
+
 #include "client.hh"
 #include "utils.hh"
 #include "external/fake_clock/fake_clock.hh"
@@ -164,8 +168,13 @@ namespace {
               (histogram_levels_powers_of(2, 4)));
     EXPECT_EQ(std::vector<double>({0, 1, 2, 4, 8, kInf}),
               histogram_levels_powers_of(2, 4));
+    EXPECT_EQ(std::vector<double>({0, 4, 8, 16, 32, 64, 128, kInf}),
+              histogram_levels_powers_of(2, 6, 2));
+
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, 0));
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, -8));
+    EXPECT_ANY_THROW(histogram_levels_powers_of(-2, 10));
+    EXPECT_ANY_THROW(histogram_levels_powers_of(0, 10));
   }
 
   TEST_F(ClientCPPTest, BadMetricNamesTest) {
@@ -199,7 +208,9 @@ namespace {
 
   TEST_F(ClientCPPTest, IntervalAccumulatorTest) {
     EXPECT_EQ(0, histogram_elapsed_time.value());
-    { IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time); }
+    {
+      IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time);
+    }
     EXPECT_EQ(1, histogram_elapsed_time.value(0));
 
     {

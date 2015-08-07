@@ -14,7 +14,8 @@ namespace prometheus {
   extern const std::vector<double> default_histogram_levels;
 
   std::vector<double> histogram_levels(std::vector<double>&&);
-  std::vector<double> histogram_levels_powers_of(double base, double count);
+  std::vector<double> histogram_levels_powers_of(double base, int count,
+						 double starting_exponent = 0);
 
   namespace impl {
 

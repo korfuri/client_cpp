@@ -8,8 +8,24 @@
 namespace prometheus {
 
   class InProgress {
+    // This is a simple RAII-based class that increments and
+    // decrements an IncDecGauge when the control flow respectively
+    // enters and leaves the lifetime of thie InProgress instance.
+    // You can use this easily to track how many threads are currently
+    // executing a function:
+    //
+    // IncDecGauge<0> long_comp(
+    //            "long_computation_current",
+    //            "Number of threads running the long computation")
+    // void run_long_computation() {
+    //   InProgress ip(long_comp);
+    //   // Do something complicated here.
+    // }
+
    public:
+    // The contructor increments the IncDecGauge by value.
     InProgress(impl::IncDecGaugeValue& g, double value = 1.0);
+    // The destructor decrements the IncDecGauge by value.
     ~InProgress();
 
    private:
@@ -25,6 +41,19 @@ namespace prometheus {
     typename clock_t = std::chrono::steady_clock,
     typename duration_t = std::chrono::milliseconds>
   class IntervalAccumulator {
+    // This is a simple RAII-based class that measures the time
+    // elapsed between its construction and its destruction and
+    // reports it into a Histogram.
+    // You can use it easily:
+    //
+    // Histogram<0> long_comp_hist(
+    //            "long_computation_time",
+    //            "Histogram of time spent in each long computation")
+    // void run_long_computation() {
+    //   IntervalAccumulator ia(long_comp_hist);
+    //   // Do something complicated here.
+    // }
+
    public:
     IntervalAccumulator(impl::HistogramValue& h)
         : h_(h), begin_(clock_t::now()) {}
