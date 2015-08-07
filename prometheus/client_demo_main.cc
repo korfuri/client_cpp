@@ -48,7 +48,7 @@ int main() {
   unicode.labels({u8"valüe"}).inc();
   unicode.labels({u8"🍌"}).inc(2);
 
-  auto v = prometheus::impl::global_registry.output_proto();
+  auto v = prometheus::impl::global_registry.collect();
   for (auto m : v) {
     std::string s;
     std::cout << prometheus::impl::metricfamily_proto_to_string(m);

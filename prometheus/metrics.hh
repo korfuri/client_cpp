@@ -1,6 +1,7 @@
 #ifndef PROMETHEUS_METRICS_HH__
 #define PROMETHEUS_METRICS_HH__
 
+#include "collector.hh"
 #include "exceptions.hh"
 #include "proto/stubs.hh"
 #include "util/container_hash.hh"
@@ -29,19 +30,19 @@ namespace prometheus {
 
     class AbstractMetric {
      public:
-      AbstractMetric(const std::string& name, const std::string& help);
       AbstractMetric(const std::string& name, const std::string& help,
-                     Registry* reg);
-      virtual void output_proto(MetricFamily* mf) const = 0;
+                     ProcessCollector* collector);
+      virtual void collect(MetricFamily* mf) const = 0;
 
      protected:
-      void output_proto_internal(MetricFamily* mf) const;
+      void collect_internal(MetricFamily* mf) const;
 
       // These static methods wrap operations on protobuf objects so
       // the header only needs a forward declaration of the classes.
       static Metric* add_metric(MetricFamily* mf);
       static LabelPair* add_label(Metric* m);
-      static void set_label(LabelPair* l, std::string const& name, std::string const& value);
+      static void set_label(LabelPair* l, std::string const& name,
+                            std::string const& value);
 
       std::string name_;
       std::string help_;
@@ -55,10 +56,16 @@ namespace prometheus {
                                  util::ContainerEq<stringarray>> map;
 
      public:
+      // template <typename... ValueArgs>
+      // LabeledMetric(std::string const& name, std::string const& help,
+      //               stringarray const& labelnames, ValueArgs const&... va) :
+      // 	LabeledMetric(name, help, labelnames, global_process_collector,
+      // va...) {}
+
       template <typename... ValueArgs>
       LabeledMetric(std::string const& name, std::string const& help,
                     stringarray const& labelnames, ValueArgs const&... va)
-          : AbstractMetric(name, help),
+          : AbstractMetric(name, help, &global_process_collector),
             default_value_(va...),
             labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
@@ -76,8 +83,8 @@ namespace prometheus {
                     labelvalues, default_value_))).first->second;
       }
 
-      virtual void output_proto(MetricFamily* mf) const {
-        output_proto_internal(mf);
+      virtual void collect(MetricFamily* mf) const {
+        collect_internal(mf);
         std::unique_lock<std::mutex> l(mutex_);
         for (const auto& it_v : values_) {
           Metric* m = add_metric(mf);
@@ -89,7 +96,7 @@ namespace prometheus {
             ++it_labelname;
             ++it_labelvalue;
           }
-          it_v.second.output_proto_value(m, mf);
+          it_v.second.collect_value(m, mf);
         }
       }
 
@@ -103,14 +110,21 @@ namespace prometheus {
     template <class ValueType>
     class UnlabeledMetric : public AbstractMetric, public ValueType {
      public:
+      // template <typename... ValueArgs>
+      // UnlabeledMetric(std::string const& name, std::string const& help,
+      //                 ValueArgs const&... va)
+      // 	: UnlabeledMetric(name, help, global_process_collector, va...)
+      // {}
+
       template <typename... ValueArgs>
       UnlabeledMetric(std::string const& name, std::string const& help,
                       ValueArgs const&... va)
-          : AbstractMetric(name, help), ValueType(va...) {}
+          : AbstractMetric(name, help, &global_process_collector),
+            ValueType(va...) {}
 
-      virtual void output_proto(MetricFamily* mf) const {
-        output_proto_internal(mf);
-        this->output_proto_value(add_metric(mf), mf);
+      virtual void collect(MetricFamily* mf) const {
+        collect_internal(mf);
+        this->collect_value(add_metric(mf), mf);
       }
     };
 

@@ -4,6 +4,7 @@ package(
 cc_library(
     name = "prometheus_client_lib",
     srcs = [
+        "collector.cc",
         "exceptions.cc",
         "metrics.cc",
         "metrics.hh",
@@ -14,6 +15,7 @@ cc_library(
         "values.hh",
     ],
     hdrs = [
+        "collector.hh",
         "client.hh",
         "exceptions.hh",
 	"utils.hh",

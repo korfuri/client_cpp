@@ -23,6 +23,12 @@ namespace prometheus {
       // strictly increasing order.
       virtual const char* what() const noexcept;
     };
+
+    class CollectorManagementException : public std::exception {
+      // A Collector was either added twice to a CollectorRegistry, or
+      // removed without being added first.
+      virtual const char* what() const noexcept;
+    };
   }
 }
 

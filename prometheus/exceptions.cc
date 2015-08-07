@@ -14,5 +14,9 @@ namespace prometheus {
     const char* InvalidNameException::what() const noexcept {
       return "invalid_name";
     }
+
+    const char* CollectorManagementException::what() const noexcept {
+      return "collector_management";
+    }
   }
 }

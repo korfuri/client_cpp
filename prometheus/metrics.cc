@@ -15,20 +15,16 @@ namespace prometheus {
     using ::io::prometheus::client::MetricFamily;
 
     AbstractMetric::AbstractMetric(const std::string& name,
-                                   const std::string& help)
-        : AbstractMetric(name, help, &global_registry) {
+                                   const std::string& help,
+                                   ProcessCollector* collector)
+        : name_(name), help_(help) {
       if (!std::regex_match(name, metric_name_re)) {
         throw err::InvalidNameException();
       }
+      collector->register_metric(this);
     }
 
-    AbstractMetric::AbstractMetric(const std::string& name,
-                                   const std::string& help, Registry* reg)
-        : name_(name), help_(help) {
-      reg->register_metric(this);
-    }
-
-    void AbstractMetric::output_proto_internal(MetricFamily* mf) const {
+    void AbstractMetric::collect_internal(MetricFamily* mf) const {
       mf->set_name(name_);
       mf->set_help(help_);
     }
@@ -39,7 +35,9 @@ namespace prometheus {
     /* static */ LabelPair* AbstractMetric::add_label(Metric* m) {
       return m->add_label();
     }
-    /* static */ void AbstractMetric::set_label(LabelPair* l, std::string const& name, std::string const& value) {
+    /* static */ void AbstractMetric::set_label(LabelPair* l,
+                                                std::string const& name,
+                                                std::string const& value) {
       l->set_name(name);
       l->set_value(value);
     }

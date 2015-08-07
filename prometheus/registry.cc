@@ -1,28 +1,43 @@
 #include "registry.hh"
-#include "output_formatter.hh"
+#include "exceptions.hh"
 #include "prometheus/proto/metrics.pb.h"
 
+#include <algorithm>
 #include <mutex>
+#include <vector>
 
 namespace prometheus {
   namespace impl {
 
-    Registry global_registry;
+    CollectorRegistry::CollectorRegistry() {}
+    CollectorRegistry::~CollectorRegistry() {}
 
-    void Registry::register_metric(AbstractMetric* metric) {
+    void CollectorRegistry::register_collector(ICollector* collector) {
       std::unique_lock<std::mutex> l(mutex_);
-      metrics_.push_back(metric);
+      if (std::find(collectors_.begin(), collectors_.end(), collector) !=
+          collectors_.end()) {
+        throw err::CollectorManagementException();
+      }
+      collectors_.push_back(collector);
     }
 
-    std::vector<MetricFamily*> Registry::output_proto() const {
-      std::vector<MetricFamily*> v;
+    void CollectorRegistry::unregister_collector(ICollector* collector) {
       std::unique_lock<std::mutex> l(mutex_);
-      for (auto const m : metrics_) {
-        auto* mf = new MetricFamily;
-        m->output_proto(mf);
-        v.push_back(mf);
+      auto it = std::find(collectors_.begin(), collectors_.end(), collector);
+      if (it == collectors_.end()) {
+        throw err::CollectorManagementException();
       }
-      return v;
+      collectors_.erase(it);
+    }
+
+    std::list<MetricFamily*> CollectorRegistry::collect() const {
+      std::unique_lock<std::mutex> l(mutex_);
+      std::list<MetricFamily*> metrics;
+      for (auto const& c : collectors_) {
+        std::list<MetricFamily*> collected_metrics = c->collect();
+        metrics.splice(metrics.begin(), collected_metrics);
+      }
+      return metrics;
     }
 
   } /* namespace impl */

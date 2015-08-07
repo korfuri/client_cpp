@@ -1,11 +1,12 @@
 #ifndef PROMETHEUS_REGISTRY_HH__
 #define PROMETHEUS_REGISTRY_HH__
 
-#include "metrics.hh"
+#include "collector.hh"
 #include "proto/stubs.hh"
 
 #include <ostream>
 #include <mutex>
+#include <list>
 #include <vector>
 
 namespace prometheus {
@@ -13,18 +14,36 @@ namespace prometheus {
 
     using ::io::prometheus::client::MetricFamily;
 
-    class Registry {
+    class CollectorRegistry {
+      // A CollectorRegistry is the main interface through which
+      // collection happens. A CollectorRegistry contains a list of
+      // Collectors, each of whom represents a collection of metrics.
+
      public:
-      void register_metric(AbstractMetric* metric);
-      void output(std::ostream& os) const;
-      std::vector<MetricFamily*> output_proto() const;
+      CollectorRegistry();
+      ~CollectorRegistry();
+
+      // Returns a list of MetricFamily protobufs ready to be
+      // exported. The called gain ownership of all allocated
+      // MetricFamily objects and must delete them to avoid leaks.
+      std::list<MetricFamily*> collect() const;
+
+      // Register or unregister a collector. Registered collectors are
+      // included in collections. Registering a collector twice, or
+      // unregistering a collector that isn't registered, will throw a
+      // CollectorManagementexception.
+      void register_collector(ICollector* collector);
+      void unregister_collector(ICollector* collector);
 
      private:
-      std::vector<AbstractMetric*> metrics_;
+      CollectorRegistry(CollectorRegistry const&) = delete;
+      CollectorRegistry operator=(CollectorRegistry const&) = delete;
+
       mutable std::mutex mutex_;
+      std::vector<ICollector*> collectors_;
     };
 
-    extern Registry global_registry;
+    extern CollectorRegistry global_registry;
 
   } /* namespace impl */
 } /* namespace prometheus */

@@ -40,7 +40,7 @@ namespace prometheus {
 
     class BaseGaugeValue : public BaseScalarValue {
      public:
-      void output_proto_value(Metric* m, MetricFamily* mf) const;
+      void collect_value(Metric* m, MetricFamily* mf) const;
     };
 
     class SetGaugeValue : public BaseGaugeValue {
@@ -57,7 +57,7 @@ namespace prometheus {
     class CounterValue : public BaseScalarValue {
      public:
       void inc(double value = 1.0);
-      void output_proto_value(Metric* m, MetricFamily* mf) const;
+      void collect_value(Metric* m, MetricFamily* mf) const;
     };
 
     class HistogramValue {
@@ -73,7 +73,7 @@ namespace prometheus {
 
       double value(double threshold = kInf) const;
 
-      void output_proto_value(Metric* m, MetricFamily* mf) const;
+      void collect_value(Metric* m, MetricFamily* mf) const;
 
      private:
       mutable std::mutex mutex_;
