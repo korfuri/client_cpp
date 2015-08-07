@@ -49,8 +49,6 @@ namespace prometheus {
     using impl::UnlabeledMetric<impl::HistogramValue>::UnlabeledMetric;
   };
 
-  extern const std::vector<double> default_histogram_levels;
-
 } /* namespace prometheus */
 
 #endif /* PROMETHEUS_CLIENT_HH__ */
