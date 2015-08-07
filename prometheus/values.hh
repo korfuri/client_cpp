@@ -10,8 +10,12 @@
 
 namespace prometheus {
 
+  // +Inf. For convenience.
   extern const double kInf;
+
+  // The set of buckets used by default in histograms.
   extern const std::vector<double> default_histogram_levels;
+
 
   // This wrapper ensures that histogram levels are not confused with
   // label name sets or other arguments when building LabeledMetrics.
@@ -54,22 +58,31 @@ namespace prometheus {
     };
 
     class BaseGaugeValue : public BaseScalarValue {
+      // A base class used by the various types of gauges. We separate
+      // "Inc/Dec" gauges from "Set" gauges to allow us to squeeze
+      // some performance by using different types of memory barriers.
      public:
       void collect_value(Metric* m, MetricFamily* mf) const;
     };
 
     class SetGaugeValue : public BaseGaugeValue {
+      // A gauge that can be set to a given value.
      public:
+      // Sets the gauge to `value`.
       void set(double value) { value_.store(value, std::memory_order_relaxed); }
     };
 
     class IncDecGaugeValue : public BaseGaugeValue {
+      // A gauge that can only be incremented or decremented.
      public:
       void inc(double value = 1.0);
       void dec(double value = 1.0);
     };
 
     class CounterValue : public BaseScalarValue {
+      // A counter is a scalar value that can only be
+      // incremented. Decrementing a counter throws a
+      // NegativeCounterIncrementException.
      public:
       void inc(double value = 1.0);
       void collect_value(Metric* m, MetricFamily* mf) const;

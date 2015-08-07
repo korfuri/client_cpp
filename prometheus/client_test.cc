@@ -13,7 +13,11 @@ namespace {
 
   using namespace prometheus;
 
-  class ClientCPPTest : public ::testing::Test {};
+  class ClientCPPTest : public ::testing::Test {
+    void SetUp() {
+      testing::fake_clock::reset_to_epoch();
+    }
+  };
 
   Counter<0> c0("test_counter0", "test Counter<0>");
   Counter<1> c1("test_counter1", "test Counter<1>", {{"x"}});
@@ -286,6 +290,22 @@ namespace {
     EXPECT_EQ(1, histogram_elapsed_time.value(0));
     EXPECT_EQ(3, histogram_elapsed_time.value(10));
     EXPECT_EQ(4, histogram_elapsed_time.value(10000));
+  }
+
+  SetGauge<0> gauge_to_current_time("current_time", "");
+  TEST_F(ClientCPPTest, SetToCurrentTimeTest) {
+    EXPECT_EQ(0, gauge_to_current_time.value());
+
+    testing::fake_clock::advance(std::chrono::seconds(950));
+    set_to_current_time<testing::fake_clock>(gauge_to_current_time);
+    EXPECT_EQ(950, gauge_to_current_time.value());
+
+    testing::fake_clock::advance(std::chrono::milliseconds(42));
+    set_to_current_time<testing::fake_clock>(gauge_to_current_time);
+    EXPECT_EQ(950.042, gauge_to_current_time.value());
+
+    set_to_current_time<testing::fake_clock, std::chrono::seconds>(gauge_to_current_time);
+    EXPECT_EQ(950, gauge_to_current_time.value());
   }
 
 } /* namespace */

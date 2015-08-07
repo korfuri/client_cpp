@@ -43,10 +43,24 @@ namespace prometheus {
     double value_;
   };
 
+  // Sets the gauge to the current Unix timestamp in floating-point
+  // seconds. Precision and epoch are dependent on the provided
+  // clock. Note that when using a custon duration_t, the durations
+  // provided in std::chrono (e.g. std::chrono::seconds) don't use
+  // floating point precision internally. Make your own durations if
+  // you want floatint point precision.
+   template<typename clock_t = std::chrono::system_clock,
+	   typename duration_t = std::chrono::duration<
+	     double, std::chrono::seconds::period>>
+    void set_to_current_time(impl::SetGaugeValue& gauge) {
+     gauge.set(std::chrono::duration_cast<duration_t>(
+		 clock_t::now().time_since_epoch()).count());
+   }
+
   template <
     typename clock_t = std::chrono::steady_clock,
-    typename duration_t = std::chrono::duration<double,
-						std::chrono::seconds::period>>
+    typename duration_t = std::chrono::duration<
+      double, std::chrono::seconds::period>>
     class IntervalAccumulator {
     // This is a simple RAII-based class that measures the time
     // elapsed between its construction and its destruction and
