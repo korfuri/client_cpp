@@ -1,16 +1,30 @@
-Ohai. I'm still playing around with this code. Don't use
-it. Eventually this will become a client library for C++ for
-[Prometheus](https://prometheus.io). If you'd like to contribute, pull
-requests are welcome but be aware that I'm still changing the overall
-structure of the code every other day, so feel free to [email
-me](mailto:korfuri@gmail.com) first to discuss your idea.
+# Prometheus C++ client library
 
-# Dependencies
+This is a client library for C++ for
+[Prometheus](https://prometheus.io).
 
+# Getting started
+
+This project uses [Bazel](http://bazel.io) to build. I welcome
+contributions to make it work on other build systems, as Bazel is kind
+of special in the way it interacts with non-Bazel projects.
+
+## Requirements
   * [Bazel](http://bazel.io)
-  * `apt-get install g++ 4.9 libicu-dev`
+  * `apt-get install g++-4.9` or higher
+  * `apt-get install libicu-dev` for Unicode support
 
-The workspace will pull:
-  * gtest
-  * protobuf
-  * client_model
+## Requirements when not using Bazel
+
+The Bazel workspace will pull these automatically for you. If you're
+not using Bazel, you'll need:
+
+  * [protobuf](https://github.com/google/protobuf)
+  * [gtest](https://code.google.com/p/googletest/) is used in unit tests.
+  * [fake_clock](https://github.com/korfuri/fake_clock) is used in unit tests.
+
+# Usage
+
+TODO :) This is not quite final yet. You are welcome to use the
+library but I don't consider it fully stable yet. Contributions (bug
+reports, pull requests, suggestions) are welcome!

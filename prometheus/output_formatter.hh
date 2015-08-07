@@ -11,14 +11,19 @@ namespace prometheus {
 
     using ::io::prometheus::client::MetricFamily;
 
+    // Converts from the protobuf exposition format to the text
+    // exposition format.
     std::string metricfamily_proto_to_string(MetricFamily const* mf);
 
+    // Escaping functions for each element of the text format.
     std::string escape_double(double d);
     std::string escape_metric_name(std::string const& s);
     std::string escape_help(std::string const& s);
     std::string escape_label_name(std::string const& s);
     std::string escape_label_value(std::string const& s);
 
+    // This exception is raised if the provided protobuf can't be
+    // converted to the text format.
     class OutputFormatterException : public std::exception {
      public:
       explicit OutputFormatterException(const char* reason) noexcept
