@@ -157,6 +157,32 @@ namespace {
     EXPECT_EQ(2, h1.labels({"b"}).value(kInf));
   }
 
+  Counter<2> c_rem("counter_removal", "", {"x", "y"});
+
+  TEST_F(ClientCPPTest, LabelRemovalTest) {
+    EXPECT_EQ(0, c_rem.labels({"a", "b"}).value());
+    EXPECT_EQ(0, c_rem.labels({"a", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "d"}).value());
+
+    c_rem.labels({"a", "b"}).inc();
+    c_rem.labels({"a", "c"}).inc(2.3);
+    c_rem.labels({"b", "d"}).inc(6.7);
+
+    EXPECT_EQ(1.0, c_rem.labels({"a", "b"}).value());
+    EXPECT_EQ(2.3, c_rem.labels({"a", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "c"}).value());
+    EXPECT_EQ(6.7, c_rem.labels({"b", "d"}).value());
+
+    c_rem.remove({"a", "c"});
+    c_rem.remove({"b", "c"});
+
+    EXPECT_EQ(1.0, c_rem.labels({"a", "b"}).value());
+    EXPECT_EQ(0, c_rem.labels({"a", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "c"}).value());
+    EXPECT_EQ(6.7, c_rem.labels({"b", "d"}).value());
+  }
+
   TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
     EXPECT_THROW(
         new Histogram<0>("test", "test", histogram_levels({3, 2, 1, 0})),

@@ -29,12 +29,21 @@ namespace prometheus {
     class Registry;
 
     class AbstractMetric {
+      // This is the base class for all metrics. Metrics are either
+      // labelled or not, and they have an underlying value type
+      // (counter, histogram, etc.). client.hh provides convenient
+      // template overloads to use Counter, Gauge, Histogram as
+      // classes with or without labels.
      public:
       AbstractMetric(const std::string& name, const std::string& help,
                      ProcessCollector* collector);
+
+      // All metrics can be collected to a MetricFamily protobuf
+      // object.
       virtual void collect(MetricFamily* mf) const = 0;
 
      protected:
+      // Sets the name and help text in the MetricFamily.
       void collect_internal(MetricFamily* mf) const;
 
       // These static methods wrap operations on protobuf objects so
@@ -50,18 +59,34 @@ namespace prometheus {
 
     template <int N, class ValueType>
     class LabeledMetric : public AbstractMetric {
+      // A labeled metric has 1 or more labels. It contains a
+      // collection of ValueType objects, indexed by the set of label
+      // values that represent this value.
+
+      // Convenience typedefs.
       typedef std::array<std::string, N> stringarray;
       typedef std::unordered_map<stringarray, ValueType,
                                  util::ContainerHash<stringarray>,
                                  util::ContainerEq<stringarray>> map;
 
      public:
+      // This constructor allows specifying a custom process
+      // collector. It's commented out because it causes issues in the
+      // template inference of gcc.
+      //
       // template <typename... ValueArgs>
       // LabeledMetric(std::string const& name, std::string const& help,
       //               stringarray const& labelnames, ValueArgs const&... va) :
       // 	LabeledMetric(name, help, labelnames, global_process_collector,
       // va...) {}
 
+      // A LabeledMetric is constructed with a name, help text, and a
+      // set of label names, as well as any arguments required by the
+      // ValueType.
+      // At construction time, a "master" ValueType is created and any
+      // new instance created in calls to labels() will be copied from
+      // this ValueType. This allows us to do expensive one-off
+      // initialization only once.
       template <typename... ValueArgs>
       LabeledMetric(std::string const& name, std::string const& help,
                     stringarray const& labelnames, ValueArgs const&... va)
@@ -77,12 +102,24 @@ namespace prometheus {
         }
       }
 
+      // Returns the ValueType instance indexed by the set of label
+      // values passed. The ValueType instance is created if needed.
       ValueType& labels(stringarray const& labelvalues) {
         std::unique_lock<std::mutex> l(mutex_);
         return (values_.insert(typename map::value_type(
                     labelvalues, default_value_))).first->second;
       }
 
+      // Removes a given set of label values and the instance of
+      // ValueType it references. No-op if this set of label values
+      // did not reference a ValueType instance yet.
+      void remove(stringarray const& labelvalues) {
+	std::unique_lock<std::mutex> l(mutex_);
+	values_.erase(labelvalues);
+      }
+
+      // Collects all values in this metric to a protobuf
+      // MetricFamily.
       virtual void collect(MetricFamily* mf) const {
         collect_internal(mf);
         std::unique_lock<std::mutex> l(mutex_);
@@ -109,7 +146,16 @@ namespace prometheus {
 
     template <class ValueType>
     class UnlabeledMetric : public AbstractMetric, public ValueType {
+      // An unlabeled metric contains one and only one instance of the
+      // ValueType. For convenience, we model this through inheritance
+      // so it is possible to call the methods of the ValueType
+      // directly on the metric.
+
      public:
+      // This constructor allows specifying a custom process
+      // collector. It's commented out because it causes issues in the
+      // template inference of gcc.
+      //
       // template <typename... ValueArgs>
       // UnlabeledMetric(std::string const& name, std::string const& help,
       //                 ValueArgs const&... va)
@@ -122,6 +168,7 @@ namespace prometheus {
           : AbstractMetric(name, help, &global_process_collector),
             ValueType(va...) {}
 
+      // Collects the metric and its value to a MetricFamily protobuf.
       virtual void collect(MetricFamily* mf) const {
         collect_internal(mf);
         this->collect_value(add_metric(mf), mf);
