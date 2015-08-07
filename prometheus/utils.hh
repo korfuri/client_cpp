@@ -39,15 +39,16 @@ namespace prometheus {
 
   template <
     typename clock_t = std::chrono::steady_clock,
-    typename duration_t = std::chrono::milliseconds>
-  class IntervalAccumulator {
+    typename duration_t = std::chrono::duration<double,
+						std::chrono::seconds::period>>
+    class IntervalAccumulator {
     // This is a simple RAII-based class that measures the time
     // elapsed between its construction and its destruction and
     // reports it into a Histogram.
     // You can use it easily:
     //
     // Histogram<0> long_comp_hist(
-    //            "long_computation_time",
+    //            "long_computation_time_seconds",
     //            "Histogram of time spent in each long computation")
     // void run_long_computation() {
     //   IntervalAccumulator ia(long_comp_hist);
@@ -56,7 +57,12 @@ namespace prometheus {
 
    public:
     IntervalAccumulator(impl::HistogramValue& h)
-        : h_(h), begin_(clock_t::now()) {}
+        : h_(h), begin_(clock_t::now()) {
+      static_assert(std::chrono::treat_as_floating_point<
+		    typename duration_t::rep>::value,
+		    "The duration passed to IntervalAccumulator must be "
+		    "expressed in a floating point type, ideally double.");
+    }
 
     ~IntervalAccumulator() {
       h_.record(std::chrono::duration_cast<duration_t>(

@@ -203,9 +203,8 @@ namespace {
                  err::InvalidNameException);
   }
 
-  Histogram<0> histogram_elapsed_time("elapsed_time_ms", "",
-                                      histogram_levels_powers_of(10, 10));
-
+  Histogram<0> histogram_elapsed_time("elapsed_time_secs", "",
+                                      histogram_levels_powers_of(10, 10, -5));
   TEST_F(ClientCPPTest, IntervalAccumulatorTest) {
     EXPECT_EQ(0, histogram_elapsed_time.value());
     {
@@ -219,7 +218,7 @@ namespace {
     }
 
     EXPECT_EQ(1, histogram_elapsed_time.value(0));
-    EXPECT_EQ(2, histogram_elapsed_time.value(10));
+    EXPECT_EQ(2, histogram_elapsed_time.value(0.01));
 
     {
       IntervalAccumulator<testing::fake_clock> _(histogram_elapsed_time);
@@ -227,11 +226,14 @@ namespace {
     }
 
     EXPECT_EQ(1, histogram_elapsed_time.value(0));
-    EXPECT_EQ(2, histogram_elapsed_time.value(10));
-    EXPECT_EQ(3, histogram_elapsed_time.value(10000));
+    EXPECT_EQ(2, histogram_elapsed_time.value(0.01));
+    EXPECT_EQ(3, histogram_elapsed_time.value(10));
 
     {
-      IntervalAccumulator<testing::fake_clock, std::chrono::seconds> _(
+      typedef std::chrono::duration<
+	double,
+	std::chrono::milliseconds::period> ms;
+      IntervalAccumulator<testing::fake_clock, ms> _(
           histogram_elapsed_time);
       testing::fake_clock::advance(std::chrono::seconds(10));
     }
