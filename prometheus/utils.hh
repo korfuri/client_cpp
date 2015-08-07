@@ -7,6 +7,12 @@
 
 namespace prometheus {
 
+  // Lets users build a metric name in the form "namespace_subsystem_metric".
+  // This is a simple concatenation.
+  std::string make_metric_name(std::string const& namespace_name,
+			       std::string const& subsystem_name,
+			       std::string const& metric_name);
+
   class InProgress {
     // This is a simple RAII-based class that increments and
     // decrements an IncDecGauge when the control flow respectively
