@@ -112,10 +112,20 @@ namespace prometheus {
 
       // Removes a given set of label values and the instance of
       // ValueType it references. No-op if this set of label values
-      // did not reference a ValueType instance yet.
+      // did not reference a ValueType instance yet. This invalidates
+      // any previously returned ValueType reference to the ValueType
+      // instance referred to by this set of labelvalues.
       void remove(stringarray const& labelvalues) {
 	std::unique_lock<std::mutex> l(mutex_);
 	values_.erase(labelvalues);
+      }
+
+      // Removes all sets of label values and their corresponding
+      // instance of ValueType. This invalidates any previously
+      // returned ValueType reference.
+      void clear() {
+	std::unique_lock<std::mutex> l(mutex_);
+	values_.clear();
       }
 
       // Collects all values in this metric to a protobuf

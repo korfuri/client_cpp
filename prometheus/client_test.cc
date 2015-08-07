@@ -181,6 +181,13 @@ namespace {
     EXPECT_EQ(0, c_rem.labels({"a", "c"}).value());
     EXPECT_EQ(0, c_rem.labels({"b", "c"}).value());
     EXPECT_EQ(6.7, c_rem.labels({"b", "d"}).value());
+
+    c_rem.clear();
+
+    EXPECT_EQ(0, c_rem.labels({"a", "b"}).value());
+    EXPECT_EQ(0, c_rem.labels({"a", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "c"}).value());
+    EXPECT_EQ(0, c_rem.labels({"b", "d"}).value());
   }
 
   TEST_F(ClientCPPTest, BadHistogramLevelsTest) {
