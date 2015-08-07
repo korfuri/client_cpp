@@ -40,6 +40,24 @@ namespace prometheus {
     return v;
   }
 
+  std::vector<double> histogram_levels_linear(double start, int count,
+					      double increment) {
+    std::vector<double> v(count + 1);
+    if (count <= 0) {
+      throw std::logic_error("invalid count of histogram buckets");
+    }
+    if (increment <= 0) {
+      throw std::logic_error("increment must be a positive number");
+    }
+    double value = start;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+      *it = value;
+      value += increment;
+    }
+    v.back() = kInf;
+    return v;
+  }
+
   namespace impl {
 
     using ::io::prometheus::client::Bucket;

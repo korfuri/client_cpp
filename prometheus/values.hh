@@ -13,9 +13,23 @@ namespace prometheus {
   extern const double kInf;
   extern const std::vector<double> default_histogram_levels;
 
+  // This wrapper ensures that histogram levels are not confused with
+  // label name sets or other arguments when building LabeledMetrics.
   std::vector<double> histogram_levels(std::vector<double>&&);
+
+  // Constructs a list of `count` histogram buckets increasing
+  // exponentially, from `base**starting_exponent`. 0 and +Inf are
+  // added at the beginning and end, respectively. Throws a
+  // logic_error if count or base is <= 0.
   std::vector<double> histogram_levels_powers_of(double base, int count,
 						 double starting_exponent = 0);
+
+  // Constructs a list of `count` histogram buckets increasing
+  // linearly by `increment`, starting from `start`. +Inf is added at
+  // end automatically. Throws a logic_error if count or increment is
+  // <= 0.
+  std::vector<double> histogram_levels_linear(double start, int count,
+					      double increment = 1.0);
 
   namespace impl {
 

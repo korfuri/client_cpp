@@ -208,6 +208,18 @@ namespace {
     EXPECT_ANY_THROW(histogram_levels_powers_of(2, -8));
     EXPECT_ANY_THROW(histogram_levels_powers_of(-2, 10));
     EXPECT_ANY_THROW(histogram_levels_powers_of(0, 10));
+
+    EXPECT_EQ(std::vector<double>({0, 1, 2, 3, 4, kInf}),
+              (histogram_levels_linear(0, 5)));
+    EXPECT_EQ(std::vector<double>({-2, -1, 0, 1, 2, kInf}),
+              (histogram_levels_linear(-2, 5)));
+    EXPECT_EQ(std::vector<double>({0, 2, 4, 6, kInf}),
+              (histogram_levels_linear(0, 4, 2)));
+
+    EXPECT_ANY_THROW(histogram_levels_linear(2, 0));
+    EXPECT_ANY_THROW(histogram_levels_linear(2, 4, 0));
+    EXPECT_ANY_THROW(histogram_levels_linear(2, -1));
+    EXPECT_ANY_THROW(histogram_levels_linear(2, 4, -1));
   }
 
   TEST_F(ClientCPPTest, BadMetricNamesTest) {
