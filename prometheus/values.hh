@@ -62,22 +62,40 @@ namespace prometheus {
     };
 
     class HistogramValue {
+      // This is the internal representation of a histogram.
+
      public:
+      // A histogram is always constructed with a fixed list of
+      // strictly increasing levels.
       HistogramValue(
           std::vector<double> const& levels = default_histogram_levels);
       ~HistogramValue();
       HistogramValue(HistogramValue const& rhs);
-      void record(double value);
 
+      // Observe the given value. This increments all buckets whose
+      // threshold is superior or equal to the value.
+      void observe(double value);
+
+      // Returns true if d is +Inf.
       static bool is_posinf(double d);
+      // Adds a +Inf bucket to the vector if none was added.
       static std::vector<double> add_inf(std::vector<double> const&);
 
+      // Returns the count of observed events at the given threshold
+      // (rounded up to the next bucket if necessary). This is useful
+      // for testing. Defaults to +Inf, which means returning the
+      // total count of observed values.
       double value(double threshold = kInf) const;
 
+      // Collects the value to a MetricFamily.
       void collect_value(Metric* m, MetricFamily* mf) const;
 
      private:
       mutable std::mutex mutex_;
+      // TODO(korfuri): The current usage duplicates the list of
+      // levels for each HistogramValue, causing unnecessary memory
+      // usage in labeled histograms. We should store the levels in
+      // the Metric or in an intermediary class, to avoid duplication.
       const std::vector<double> levels_;
       std::vector<uint64_t> values_;
       double samples_sum_;

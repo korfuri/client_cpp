@@ -30,18 +30,18 @@ int main() {
   bloops.inc();
 
   Histogram<0> blups("blups", "Distribution of blups.");
-  blups.record(.5);
-  blups.record(5);
-  blups.record(10);
-  blups.record(10000000);
+  blups.observe(.5);
+  blups.observe(5);
+  blups.observe(10);
+  blups.observe(10000000);
 
   Histogram<2> blups_by_blip_blop(
       "blups_by_blip_blop", "Distribution of blups by blip and blop.",
       {"blip", "blop"}, histogram_levels({0, 1, 10, 100, 1000, 10000}));
-  blups_by_blip_blop.labels({"a", "b"}).record(.5);
-  blups_by_blip_blop.labels({"a", "b"}).record(5);
-  blups_by_blip_blop.labels({"a", "c"}).record(10);
-  blups_by_blip_blop.labels({"e", "d"}).record(10000000);
+  blups_by_blip_blop.labels({"a", "b"}).observe(.5);
+  blups_by_blip_blop.labels({"a", "b"}).observe(5);
+  blups_by_blip_blop.labels({"a", "c"}).observe(10);
+  blups_by_blip_blop.labels({"e", "d"}).observe(10000000);
 
   Counter<1> unicode(u8"unicode_metric", u8"This metric tests üñíçøđè support",
                      {u8"label"});

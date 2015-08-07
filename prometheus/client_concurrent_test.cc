@@ -107,8 +107,8 @@ namespace {
   void f_histogramtest(int threadid) {
     std::string threadgroup = std::to_string(threadid % 4);
     for (int i = 0; i < kIterations; ++i) {
-      h1.labels({threadgroup}).record((double)i / 1000.0);
-      h1a.labels({std::to_string(i)}).record(threadid);
+      h1.labels({threadgroup}).observe((double)i / 1000.0);
+      h1a.labels({std::to_string(i)}).observe(threadid);
     }
   }
 

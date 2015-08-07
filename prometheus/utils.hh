@@ -65,7 +65,7 @@ namespace prometheus {
     }
 
     ~IntervalAccumulator() {
-      h_.record(std::chrono::duration_cast<duration_t>(
+      h_.observe(std::chrono::duration_cast<duration_t>(
         clock_t::now() - begin_).count());
     }
 

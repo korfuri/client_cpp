@@ -106,7 +106,7 @@ namespace prometheus {
       }
     }
 
-    void HistogramValue::record(double v) {
+    void HistogramValue::observe(double v) {
       auto lvl_it = levels_.begin();
       auto v_it = values_.begin();
       {

@@ -108,12 +108,12 @@ namespace {
   Histogram<1> h1("test_histogram1", "test Histogram<1>", {{"x"}});
 
   TEST_F(ClientCPPTest, UnlabelledHistogramTest) {
-    h0.record(1.5);
-    h0.record(7.5);
-    h0a.record(1.5);
-    h0a.record(7.5);
-    h0b.record(1.5);
-    h0b.record(7.5);
+    h0.observe(1.5);
+    h0.observe(7.5);
+    h0a.observe(1.5);
+    h0a.observe(7.5);
+    h0b.observe(1.5);
+    h0b.observe(7.5);
 
     EXPECT_EQ(0, h0.value(0.05));
     EXPECT_EQ(0, h0a.value(0.05));
@@ -142,9 +142,9 @@ namespace {
   }
 
   TEST_F(ClientCPPTest, LabelledHistogramTest) {
-    h1.labels({"a"}).record(4.2);
-    h1.labels({"b"}).record(4.6);
-    h1.labels({"b"}).record(5.6);
+    h1.labels({"a"}).observe(4.2);
+    h1.labels({"b"}).observe(4.6);
+    h1.labels({"b"}).observe(5.6);
 
     EXPECT_EQ(1, h1.labels({"a"}).value(4.2));
     EXPECT_EQ(1, h1.labels({"b"}).value(4.6));
