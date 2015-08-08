@@ -292,6 +292,40 @@ namespace {
     EXPECT_EQ(4, histogram_elapsed_time.value(10000));
   }
 
+  SetGauge<0> gauge_elapsed_time("last_elapsed_time_secs", "");
+  TEST_F(ClientCPPTest, IntervalReporterTest) {
+    EXPECT_EQ(0, gauge_elapsed_time.value());
+    {
+      IntervalReporter<testing::fake_clock> _(gauge_elapsed_time);
+    }
+    EXPECT_EQ(0, gauge_elapsed_time.value());
+
+    {
+      IntervalReporter<testing::fake_clock> _(gauge_elapsed_time);
+      testing::fake_clock::advance(std::chrono::milliseconds(10));
+    }
+
+    EXPECT_EQ(0.01, gauge_elapsed_time.value());
+
+    {
+      IntervalReporter<testing::fake_clock> _(gauge_elapsed_time);
+      testing::fake_clock::advance(std::chrono::seconds(10));
+    }
+
+    EXPECT_EQ(10, gauge_elapsed_time.value());
+
+    {
+      typedef std::chrono::duration<
+	double,
+	std::chrono::milliseconds::period> ms;
+      IntervalReporter<testing::fake_clock, ms> _(
+          gauge_elapsed_time);
+      testing::fake_clock::advance(std::chrono::seconds(10));
+    }
+
+    EXPECT_EQ(10000, gauge_elapsed_time.value());
+  }
+
   SetGauge<0> gauge_to_current_time("current_time", "");
   TEST_F(ClientCPPTest, SetToCurrentTimeTest) {
     EXPECT_EQ(0, gauge_to_current_time.value());

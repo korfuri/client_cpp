@@ -28,13 +28,13 @@ namespace prometheus {
     //   // Do something complicated here.
     // }
 
-   public:
+  public:
     // The contructor increments the IncDecGauge by value.
     InProgress(impl::IncDecGaugeValue& g, double value = 1.0);
     // The destructor decrements the IncDecGauge by value.
     ~InProgress();
 
-   private:
+  private:
     InProgress(InProgress const&) = delete;
     InProgress(InProgress&&) = delete;
     InProgress& operator=(InProgress const&) = delete;
@@ -49,24 +49,21 @@ namespace prometheus {
   // provided in std::chrono (e.g. std::chrono::seconds) don't use
   // floating point precision internally. Make your own durations if
   // you want floatint point precision.
-   template<typename clock_t = std::chrono::system_clock,
+  template<typename clock_t = std::chrono::system_clock,
 	   typename duration_t = std::chrono::duration<
 	     double, std::chrono::seconds::period>>
     void set_to_current_time(impl::SetGaugeValue& gauge) {
-     gauge.set(std::chrono::duration_cast<duration_t>(
-		 clock_t::now().time_since_epoch()).count());
-   }
+    gauge.set(std::chrono::duration_cast<duration_t>(
+		clock_t::now().time_since_epoch()).count());
+  }
 
-  template <
-    typename clock_t = std::chrono::steady_clock,
-    typename duration_t = std::chrono::duration<
-      double, std::chrono::seconds::period>>
-    class IntervalAccumulator {
-    // This is a simple RAII-based class that measures the time
-    // elapsed between its construction and its destruction and
-    // reports it into a Histogram.
-    // You can use it easily:
-    //
+  template <typename clock_t, typename duration_t>
+  class AbstractIntervalMeasure {
+    // This is the basis of a simple RAII-based class that measures
+    // the time elapsed between its construction and its destruction
+    // and reports it into a Histogram (via IntervalAccumulator) or a
+    // SetGauge (via IntervalReporter).
+
     // Histogram<0> long_comp_hist(
     //            "long_computation_time_seconds",
     //            "Histogram of time spent in each long computation")
@@ -75,27 +72,83 @@ namespace prometheus {
     //   // Do something complicated here.
     // }
 
-   public:
-    IntervalAccumulator(impl::HistogramValue& h)
-        : h_(h), begin_(clock_t::now()) {
+  public:
+    AbstractIntervalMeasure()
+      : begin_(clock_t::now()) {
       static_assert(std::chrono::treat_as_floating_point<
 		    typename duration_t::rep>::value,
-		    "The duration passed to IntervalAccumulator must be "
+		    "The duration passed to AbstractIntervalMeasure must be "
 		    "expressed in a floating point type, ideally double.");
     }
 
-    ~IntervalAccumulator() {
-      h_.observe(std::chrono::duration_cast<duration_t>(
-        clock_t::now() - begin_).count());
+    double value() {
+      return (std::chrono::duration_cast<duration_t>(
+		clock_t::now() - begin_).count());
     }
 
-   private:
-    IntervalAccumulator(IntervalAccumulator const&) = delete;
-    IntervalAccumulator(IntervalAccumulator&&) = delete;
-    IntervalAccumulator& operator=(IntervalAccumulator const&) = delete;
-    IntervalAccumulator& operator=(IntervalAccumulator&&) = delete;
-    impl::HistogramValue& h_;
+  private:
+    AbstractIntervalMeasure(AbstractIntervalMeasure const&) = delete;
+    AbstractIntervalMeasure(AbstractIntervalMeasure&&) = delete;
+    AbstractIntervalMeasure& operator=(AbstractIntervalMeasure const&) = delete;
+    AbstractIntervalMeasure& operator=(AbstractIntervalMeasure&&) = delete;
     std::chrono::time_point<clock_t> begin_;
+  };
+
+
+  template <
+    typename clock_t = std::chrono::steady_clock,
+    typename duration_t = std::chrono::duration<
+      double, std::chrono::seconds::period> >
+  class IntervalAccumulator : AbstractIntervalMeasure<clock_t, duration_t> {
+    // See Abstractintervalmeasure for information.
+    // Usage:
+    //
+    // Histogram<0> long_comp_hist(
+    //            "long_computation_time_seconds",
+    //            "Histogram of time spent in each long computation")
+    // void run_long_computation() {
+    //   IntervalAccumulator<> ia(long_comp_hist);
+    //   // Do something complicated here.
+    // }
+
+  public:
+    IntervalAccumulator(impl::HistogramValue& h)
+      : h_(h) {}
+
+    ~IntervalAccumulator() {
+      h_.observe(this->value());
+    }
+
+  private:
+    impl::HistogramValue& h_;
+  };
+
+  template <
+    typename clock_t = std::chrono::steady_clock,
+    typename duration_t = std::chrono::duration<
+      double, std::chrono::seconds::period> >
+  class IntervalReporter : AbstractIntervalMeasure<clock_t, duration_t> {
+    // See Abstractintervalmeasure for information.
+    // Usage:
+    //
+    // SetGauge<0> long_comp_last(
+    //            "last_long_computation_time_seconds",
+    //            "Time spent in the last long computation")
+    // void run_long_computation() {
+    //   IntervalReporter<> ir(long_comp_last);
+    //   // Do something complicated here.
+    // }
+
+  public:
+    IntervalReporter(impl::SetGaugeValue& g)
+      : g_(g) {}
+
+    ~IntervalReporter() {
+      g_.set(this->value());
+    }
+
+  private:
+    impl::SetGaugeValue& g_;
   };
 }
 
