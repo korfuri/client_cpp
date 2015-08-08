@@ -5,6 +5,7 @@
 #include <string>
 
 namespace {
+  using namespace prometheus;
   using namespace prometheus::impl;
 
   class OutputFormatterTest : public ::testing::Test {};

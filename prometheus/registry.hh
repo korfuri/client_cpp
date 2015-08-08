@@ -43,9 +43,15 @@ namespace prometheus {
       std::vector<ICollector*> collectors_;
     };
 
+    // The global registry is available for clients to collect all
+    // metrics.
     extern CollectorRegistry global_registry;
 
   } /* namespace impl */
+
+  // Deletes a MetricFamily returned by a call to collect().
+  void delete_metricfamily(::io::prometheus::client::MetricFamily*);
+
 } /* namespace prometheus */
 
 #endif
