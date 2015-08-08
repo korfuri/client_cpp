@@ -62,10 +62,22 @@ cc_test(
     srcs = ["client_concurrent_test.cc"],
     deps = [
         ":prometheus_client_lib",
-        "@gtest//gtest:gtest",
         "@gtest//gtest:gtest_main",
     ],
     size = "small")
+
+cc_test(
+    name = "benchmark_test",
+    srcs = ["benchmark_test.cc"],
+    deps = [
+        ":prometheus_client_lib",
+        ":prometheus_output_formatter_lib",
+        "@gtest//gtest:gtest",
+    ],
+    size = "large",
+    timeout = "long",
+    # Don't run this test when testing //...
+    tags = ["manual"])
 
 sh_test(
     name = "client_integration_test",
