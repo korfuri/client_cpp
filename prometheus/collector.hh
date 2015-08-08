@@ -18,11 +18,11 @@ namespace prometheus {
 
   class ICollector {
     // This is the interface for collectors. Most users don't need to
-    // define their own collector, there is a global ProcessCollector
-    // at prometheus::impl::global_process_collector, and metrics
-    // default to registering with that collector. The main use case
-    // to define your own collector is if you're re-exporting metrics
-    // collected from another process.
+    // define their own collector, there is a global Collector at
+    // prometheus::impl::global_collector, and metrics default to
+    // registering with that collector. The main use case to define
+    // your own collector is if you're generating metrics from a data
+    // source such as /proc, or another process' metrics.
 
    public:
     virtual ~ICollector() {}
@@ -33,33 +33,35 @@ namespace prometheus {
     virtual std::list<impl::MetricFamily*> collect() const = 0;
   };
 
+  class CollectionException : public std::runtime_error {};
+
   namespace impl {
 
-    class ProcessCollector : public ICollector {
+    class Collector : public ICollector {
      public:
-      // Constructing a ProcessCollector registers that collector with
-      // a CollectorRegistry. Destroying the ProcessCollector does NOT
+      // Constructing a Collector registers that collector with
+      // a CollectorRegistry. Destroying the Collector does NOT
       // unregister it automatically, it is up to the caller to
-      // unregister the ProcessCollector first.
-      ProcessCollector(impl::CollectorRegistry& registry);
-      virtual ~ProcessCollector();
+      // unregister the Collector first.
+      Collector(impl::CollectorRegistry& registry);
+      virtual ~Collector();
 
       // See ICollector::collect.
       virtual std::list<MetricFamily*> collect() const;
 
-      // Registers a metric with this ProcessCollector. The metric
+      // Registers a metric with this Collector. The metric
       // can't be unregistered.
       void register_metric(AbstractMetric* metric);
 
      private:
-      ProcessCollector(ProcessCollector const&) = delete;
-      ProcessCollector& operator=(ProcessCollector const&) = delete;
+      Collector(Collector const&) = delete;
+      Collector& operator=(Collector const&) = delete;
 
       std::vector<AbstractMetric*> metrics_;
       mutable std::mutex mutex_;
     };
 
-    extern ProcessCollector global_process_collector;
+    extern Collector global_collector;
   } /* namespace impl */
 } /* namespace prometheus */
 

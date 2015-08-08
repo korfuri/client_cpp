@@ -10,20 +10,20 @@ namespace prometheus {
   namespace impl {
 
     CollectorRegistry global_registry;
-    ProcessCollector global_process_collector(global_registry);
+    Collector global_collector(global_registry);
 
-    ProcessCollector::ProcessCollector(CollectorRegistry& registry) {
+    Collector::Collector(CollectorRegistry& registry) {
       registry.register_collector(this);
     }
 
-    ProcessCollector::~ProcessCollector() {}
+    Collector::~Collector() {}
 
-    void ProcessCollector::register_metric(AbstractMetric* metric) {
+    void Collector::register_metric(AbstractMetric* metric) {
       std::unique_lock<std::mutex> l(mutex_);
       metrics_.push_back(metric);
     }
 
-    std::list<MetricFamily*> ProcessCollector::collect() const {
+    std::list<MetricFamily*> Collector::collect() const {
       std::list<MetricFamily*> v;
       std::unique_lock<std::mutex> l(mutex_);
       for (auto const m : metrics_) {

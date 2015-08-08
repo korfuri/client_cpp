@@ -16,7 +16,7 @@ namespace prometheus {
 
     AbstractMetric::AbstractMetric(const std::string& name,
                                    const std::string& help,
-                                   ProcessCollector* collector)
+                                   Collector* collector)
         : name_(name), help_(help) {
       if (!std::regex_match(name, metric_name_re)) {
         throw err::InvalidNameException();

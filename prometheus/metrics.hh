@@ -36,7 +36,7 @@ namespace prometheus {
       // classes with or without labels.
      public:
       AbstractMetric(const std::string& name, const std::string& help,
-                     ProcessCollector* collector);
+                     Collector* collector);
 
       // All metrics can be collected to a MetricFamily protobuf
       // object.
@@ -70,14 +70,14 @@ namespace prometheus {
                                  util::ContainerEq<stringarray>> map;
 
      public:
-      // This constructor allows specifying a custom process
-      // collector. It's commented out because it causes issues in the
-      // template inference of gcc.
+      // This constructor allows specifying a custom collector. It's
+      // commented out because it causes issues in the template
+      // inference of gcc.
       //
       // template <typename... ValueArgs>
       // LabeledMetric(std::string const& name, std::string const& help,
       //               stringarray const& labelnames, ValueArgs const&... va) :
-      // 	LabeledMetric(name, help, labelnames, global_process_collector,
+      // 	LabeledMetric(name, help, labelnames, global_collector,
       // va...) {}
 
       // A LabeledMetric is constructed with a name, help text, and a
@@ -90,7 +90,7 @@ namespace prometheus {
       template <typename... ValueArgs>
       LabeledMetric(std::string const& name, std::string const& help,
                     stringarray const& labelnames, ValueArgs const&... va)
-          : AbstractMetric(name, help, &global_process_collector),
+          : AbstractMetric(name, help, &global_collector),
             default_value_(va...),
             labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
@@ -162,20 +162,20 @@ namespace prometheus {
       // directly on the metric.
 
      public:
-      // This constructor allows specifying a custom process
-      // collector. It's commented out because it causes issues in the
-      // template inference of gcc.
+      // This constructor allows specifying a custom collector. It's
+      // commented out because it causes issues in the template
+      // inference of gcc.
       //
       // template <typename... ValueArgs>
       // UnlabeledMetric(std::string const& name, std::string const& help,
       //                 ValueArgs const&... va)
-      // 	: UnlabeledMetric(name, help, global_process_collector, va...)
+      // 	: UnlabeledMetric(name, help, global_collector, va...)
       // {}
 
       template <typename... ValueArgs>
       UnlabeledMetric(std::string const& name, std::string const& help,
                       ValueArgs const&... va)
-          : AbstractMetric(name, help, &global_process_collector),
+          : AbstractMetric(name, help, &global_collector),
             ValueType(va...) {}
 
       // Collects the metric and its value to a MetricFamily protobuf.
