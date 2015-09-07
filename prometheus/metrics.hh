@@ -23,9 +23,6 @@ namespace prometheus {
     using ::io::prometheus::client::MetricFamily;
     using ::io::prometheus::client::Metric;
 
-    extern const std::regex label_name_re;
-    extern const std::regex metric_name_re;
-
     class Registry;
 
     class AbstractMetric {
@@ -94,6 +91,7 @@ namespace prometheus {
             default_value_(va...),
             labelnames_(labelnames) {
         static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
+        const std::regex label_name_re("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
         for (auto const& l : labelnames_) {
           if (l == "le" || l == "quantile" ||
               !std::regex_match(l, label_name_re)) {

@@ -8,17 +8,14 @@
 namespace prometheus {
   namespace impl {
 
-    const std::regex label_name_re("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-    const std::regex metric_name_re(
-        "^((_[a-zA-Z0-9:])|[a-zA-Z:])[a-zA-Z0-9_:]*$");
-
     using ::io::prometheus::client::MetricFamily;
 
     AbstractMetric::AbstractMetric(const std::string& name,
                                    const std::string& help,
                                    Collector* collector)
         : name_(name), help_(help) {
-      if (!std::regex_match(name, metric_name_re)) {
+      const std::regex metric_name_re("^((_[a-zA-Z0-9:])|[a-zA-Z:])[a-zA-Z0-9_:]*$");
+      if (!std::regex_match(name_, metric_name_re)) {
         throw err::InvalidNameException();
       }
       collector->register_metric(this);
