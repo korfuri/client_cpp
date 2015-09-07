@@ -3,6 +3,13 @@ package(
 
 cc_library(
     name = "prometheus_client_lib",
+    deps = [":prometheus_client_lib_lite"],
+    srcs = ["standard_exports.cc"],
+    hdrs = ["standard_exports.hh"],
+    visibility = ["//visibility:public"])
+
+cc_library(
+    name = "prometheus_client_lib_lite",
     srcs = [
         "collector.cc",
         "exceptions.cc",
@@ -35,13 +42,14 @@ cc_library(
     hdrs = ["output_formatter.hh"],
     deps = [
         "//prometheus/proto:metrics_proto",
-    ])
+    ],
+    visibility = ["//visibility:public"])
 
 cc_binary(
     name = "client_demo",
     srcs = ["client_demo_main.cc"],
     deps = [
-        ":prometheus_client_lib",
+        ":prometheus_client_lib_lite",
         ":prometheus_output_formatter_lib",
         "@protobuf//:protobuf",
     ])
@@ -50,7 +58,7 @@ cc_test(
     name = "client_test",
     srcs = ["client_test.cc"],
     deps = [
-        ":prometheus_client_lib",
+        ":prometheus_client_lib_lite",
         "@fake_clock//:fake_clock_lib",
         "@gtest//gtest:gtest_main",
     ],
@@ -61,7 +69,7 @@ cc_test(
     name = "client_concurrent_test",
     srcs = ["client_concurrent_test.cc"],
     deps = [
-        ":prometheus_client_lib",
+        ":prometheus_client_lib_lite",
         "@gtest//gtest:gtest_main",
     ],
     size = "small")
