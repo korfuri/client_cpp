@@ -59,3 +59,6 @@ blups_by_blip_blop{blip="e",blop="d",le="+Inf"} = 1
 # TYPE unicode_metric counter
 unicode_metric{label="valüe"} = 1
 unicode_metric{label="🍌"} = 2
+# HELP prometheus_client_collection_errors_total Count of exceptions raised by collectors during the metric collection process.
+# TYPE prometheus_client_collection_errors_total counter
+prometheus_client_collection_errors_total = 0

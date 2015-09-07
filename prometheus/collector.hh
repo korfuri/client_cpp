@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <list>
+#include <stdexcept>
 #include <vector>
 
 namespace prometheus {
@@ -29,7 +30,13 @@ namespace prometheus {
 
     // Returns a list of MetricFamily protobufs ready to be
     // exported. The called gain ownership of all allocated
-    // MetricFamily objects. This method must be thread-safe.
+    // MetricFamily objects. This method must be thread-safe. It may
+    // throw a CollectionException to signify that collection could
+    // not happen at this time. The CollectionException should provide
+    // a what() string explaining the reason collection couldn't
+    // happen. Other exceptions will interrupt the registry's
+    // collection process and no metrics will be exposed for this
+    // collection of the whole registry.
     virtual std::list<impl::MetricFamily*> collect() const = 0;
   };
 

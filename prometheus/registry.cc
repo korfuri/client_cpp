@@ -1,4 +1,5 @@
 #include "registry.hh"
+#include "client.hh"
 #include "exceptions.hh"
 #include "prometheus/proto/metrics.pb.h"
 
@@ -8,6 +9,11 @@
 
 namespace prometheus {
   namespace impl {
+
+    Counter<0> collection_errors(
+      "prometheus_client_collection_errors_total",
+      ("Count of exceptions raised by collectors during the metric"
+       " collection process."));
 
     CollectorRegistry::CollectorRegistry() {}
     CollectorRegistry::~CollectorRegistry() {}
@@ -34,8 +40,12 @@ namespace prometheus {
       std::unique_lock<std::mutex> l(mutex_);
       std::list<MetricFamily*> metrics;
       for (auto const& c : collectors_) {
-        std::list<MetricFamily*> collected_metrics = c->collect();
-        metrics.splice(metrics.begin(), collected_metrics);
+	try {
+	  std::list<MetricFamily*> collected_metrics = c->collect();
+	  metrics.splice(metrics.begin(), collected_metrics);
+	} catch (CollectionException const&) {
+	  collection_errors.inc();
+	}
       }
       return metrics;
     }
