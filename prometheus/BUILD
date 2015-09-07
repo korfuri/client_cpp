@@ -51,7 +51,6 @@ cc_binary(
     deps = [
         ":prometheus_client_lib_lite",
         ":prometheus_output_formatter_lib",
-        "@protobuf//:protobuf",
     ])
 
 cc_test(

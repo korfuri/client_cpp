@@ -13,13 +13,13 @@ of special in the way it interacts with non-Bazel projects.
   * [Bazel](http://bazel.io)
   * `apt-get install g++-4.9` or higher
   * `apt-get install libicu-dev` for Unicode support
+  * `apt-get install libprotobuf-dev protobuf-compiler` for Protocol Buffers
 
 ## Requirements when not using Bazel
 
 The Bazel workspace will pull these automatically for you. If you're
 not using Bazel, you'll need:
 
-  * [protobuf](https://github.com/google/protobuf)
   * [gtest](https://code.google.com/p/googletest/) is used in unit tests.
   * [fake_clock](https://github.com/korfuri/fake_clock) is used in unit tests.
 

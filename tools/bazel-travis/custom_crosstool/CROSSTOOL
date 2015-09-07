@@ -111,6 +111,12 @@ toolchain {
   linker_flag: "-licuuc"
   linker_flag: "-licudata"
 
+  # We need to use the system's protobuf library. This is not Bazel
+  # friendly but ultimately we want to link against code that uses the
+  # system's protobuf lib. Protobuf is allergic to version
+  # incompatibilities. so we use the system's version.
+  linker_flag: "-lprotobuf"
+
   compilation_mode_flags {
     mode: DBG
     # Enable debug symbols.

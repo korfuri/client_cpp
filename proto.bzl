@@ -1,13 +1,7 @@
 proto_filetype = FileType([".proto"])
 
 def proto_library(name, src, deps = None):
-    proto_cc_deps = [
-        "@protobuf//:protoc",
-    ]
-    cc_deps = [
-        "@protobuf//:protobuf"
-    ]
-    command = "$(location @protobuf//:protoc) --cpp_out=$(GENDIR)/"
+    command = "protoc --cpp_out=$(GENDIR)/"
     command += " $(location %s)" % (src)
 
     basename = src[0:-5]
@@ -18,10 +12,10 @@ def proto_library(name, src, deps = None):
     outputs = header_outputs + [
         basename + "pb.cc",
     ]
-      
+
     native.genrule(
         name = cc_proto_name,
-        srcs = [ src ] + proto_cc_deps,
+        srcs = [ src ],
         cmd = command,
         outs = outputs,
     )
@@ -31,5 +25,5 @@ def proto_library(name, src, deps = None):
         srcs = [
             ":" + cc_proto_name
         ],
-        deps = cc_deps,
+        deps = deps,
     )
