@@ -52,7 +52,7 @@ namespace prometheus {
 
   } /* namespace impl */
 
-  void delete_metricfamily(::io::prometheus::client::MetricFamily* mf) {
+  void delete_metricfamily(::prometheus::client::MetricFamily* mf) {
     delete mf;
   }
 } /* namespace prometheus */

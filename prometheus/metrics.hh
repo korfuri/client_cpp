@@ -19,9 +19,9 @@
 namespace prometheus {
   namespace impl {
 
-    using ::io::prometheus::client::LabelPair;
-    using ::io::prometheus::client::MetricFamily;
-    using ::io::prometheus::client::Metric;
+    using ::prometheus::client::LabelPair;
+    using ::prometheus::client::MetricFamily;
+    using ::prometheus::client::Metric;
 
     class Registry;
 

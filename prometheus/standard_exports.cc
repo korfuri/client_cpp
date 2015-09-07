@@ -20,7 +20,7 @@ namespace prometheus {
         MetricFamily* mf = new MetricFamily();
         mf->set_name(name);
         mf->set_help(help);
-        mf->set_type(::io::prometheus::client::MetricType::GAUGE);
+        mf->set_type(::prometheus::client::MetricType::GAUGE);
         mf->add_metric()->mutable_gauge()->set_value(value);
         l.push_back(mf);
       }

@@ -11,7 +11,7 @@
 namespace prometheus {
 
   namespace impl {
-    using ::io::prometheus::client::MetricFamily;
+    using ::prometheus::client::MetricFamily;
 
     class AbstractMetric;
     class CollectorRegistry;

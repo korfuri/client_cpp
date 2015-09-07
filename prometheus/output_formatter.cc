@@ -10,11 +10,11 @@
 
 namespace prometheus {
 
-  using ::io::prometheus::client::Bucket;
-  using ::io::prometheus::client::Histogram;
-  using ::io::prometheus::client::LabelPair;
-  using ::io::prometheus::client::Metric;
-  using ::io::prometheus::client::MetricType;
+  using ::prometheus::client::Bucket;
+  using ::prometheus::client::Histogram;
+  using ::prometheus::client::LabelPair;
+  using ::prometheus::client::Metric;
+  using ::prometheus::client::MetricType;
 
   static std::string escape_type(MetricType const& t) {
     switch (t) {

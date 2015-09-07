@@ -60,14 +60,14 @@ namespace prometheus {
 
   namespace impl {
 
-    using ::io::prometheus::client::Bucket;
-    using ::io::prometheus::client::Histogram;
-    using ::io::prometheus::client::Metric;
-    using ::io::prometheus::client::MetricFamily;
+    using ::prometheus::client::Bucket;
+    using ::prometheus::client::Histogram;
+    using ::prometheus::client::Metric;
+    using ::prometheus::client::MetricFamily;
 
     void BaseGaugeValue::collect_value(Metric* m, MetricFamily* mf) const {
       m->mutable_gauge()->set_value(value_);
-      mf->set_type(::io::prometheus::client::MetricType::GAUGE);
+      mf->set_type(::prometheus::client::MetricType::GAUGE);
     }
 
     void IncDecGaugeValue::inc(double value) {
@@ -89,7 +89,7 @@ namespace prometheus {
 
     void CounterValue::collect_value(Metric* m, MetricFamily* mf) const {
       m->mutable_counter()->set_value(value_);
-      mf->set_type(::io::prometheus::client::MetricType::COUNTER);
+      mf->set_type(::prometheus::client::MetricType::COUNTER);
     }
 
     HistogramValue::HistogramValue(std::vector<double> const& levels)
@@ -158,7 +158,7 @@ namespace prometheus {
 
     void HistogramValue::collect_value(Metric* m, MetricFamily* mf) const {
       Histogram* h = m->mutable_histogram();
-      mf->set_type(::io::prometheus::client::MetricType::HISTOGRAM);
+      mf->set_type(::prometheus::client::MetricType::HISTOGRAM);
       auto it = values_.begin();
       {
         std::lock_guard<std::mutex> l(mutex_);

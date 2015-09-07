@@ -8,7 +8,7 @@
 namespace prometheus {
   namespace impl {
 
-    using ::io::prometheus::client::MetricFamily;
+    using ::prometheus::client::MetricFamily;
 
     AbstractMetric::AbstractMetric(const std::string& name,
                                    const std::string& help,

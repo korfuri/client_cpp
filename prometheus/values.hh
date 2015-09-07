@@ -37,8 +37,8 @@ namespace prometheus {
 
   namespace impl {
 
-    using ::io::prometheus::client::Metric;
-    using ::io::prometheus::client::MetricFamily;
+    using ::prometheus::client::Metric;
+    using ::prometheus::client::MetricFamily;
 
     class BaseScalarValue {
       // A base class used by the various scalar values (counter and gauges).

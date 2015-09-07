@@ -13,7 +13,11 @@
 
 syntax = "proto2";
 
-package io.prometheus.client;
+// TODO(korfuri): The proper package is io.prometheus.client. This
+// causes an issue with old protocs as they refer to
+// io::prometheus::client which clashes with google::protobuf::io.
+// Thus we temporarily use package prometheus.client instead.
+package prometheus.client;
 option java_package = "io.prometheus.client";
 
 message LabelPair {

@@ -7,7 +7,7 @@
 
 namespace prometheus {
 
-  using ::io::prometheus::client::MetricFamily;
+  using ::prometheus::client::MetricFamily;
 
   // Converts from the protobuf exposition format to the text
   // exposition format.

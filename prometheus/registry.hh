@@ -12,7 +12,7 @@
 namespace prometheus {
   namespace impl {
 
-    using ::io::prometheus::client::MetricFamily;
+    using ::prometheus::client::MetricFamily;
 
     class CollectorRegistry {
       // A CollectorRegistry is the main interface through which
@@ -50,7 +50,7 @@ namespace prometheus {
   } /* namespace impl */
 
   // Deletes a MetricFamily returned by a call to collect().
-  void delete_metricfamily(::io::prometheus::client::MetricFamily*);
+  void delete_metricfamily(::prometheus::client::MetricFamily*);
 
 } /* namespace prometheus */
 
