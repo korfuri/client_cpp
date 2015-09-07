@@ -1,12 +1,30 @@
 #ifndef PROMETHEUS_MICROHTTPD_H__
 #define PROMETHEUS_MICROHTTPD_H__
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
 
   struct MHD_Connection;
   struct MHD_Response;
+
+  // Records metrics before running the AccessHandlerCallback.  It's
+  // recommended you call this function first thing in your AHC
+  // callback.
+  void record_stats_before_access_handler(struct MHD_Connection* connection,
+                                          const char* url,
+                                          const char* method,
+                                          const char* version,
+                                          const char* upload_data,
+                                          size_t* upload_data_size);
+
+  // Records stats just before sending a response.
+  // Call this just before calling MHD_queue_response.
+  void record_stats_before_queue_response(struct MHD_Connection* connection,
+                                          int http_status,
+                                          struct MHD_Response* response);
 
   // Handles a /metrics request. The caller is responsible for
   // checking that the URL path corresponds to /metrics or to the

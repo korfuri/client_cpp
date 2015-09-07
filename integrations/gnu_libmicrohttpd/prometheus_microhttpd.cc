@@ -1,4 +1,5 @@
 #include "prometheus_microhttpd.h"
+#include <prometheus/client.hh>
 #include <prometheus/registry.hh>
 #include <prometheus/output_formatter.hh>
 #include <prometheus/standard_exports.hh>
@@ -42,6 +43,34 @@ MHD_Response* handle_metrics(struct MHD_Connection* connection) {
     MHD_add_response_header(response, "Content-Type", TEXT_FORMAT_CONTENT_TYPE);
   }
   return response;
+}
+
+using prometheus::Counter;
+
+Counter<1> requests_total("libmicrohttpd_http_requests_by_transport_total",
+                          "Number of processed HTTP requests.",
+                          {{"transport"}});
+
+void record_stats_before_access_handler(struct MHD_Connection* connection,
+                                        const char* url,
+                                        const char* method,
+                                        const char* version,
+                                        const char* upload_data,
+                                        size_t* upload_data_size) {
+  const union MHD_ConnectionInfo* connection_info;
+  // SSL or not?
+  connection_info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_PROTOCOL);
+  const std::string transport = (connection_info != NULL) ? "https" : "http";
+  requests_total.labels({{transport}}).inc();
+}
+
+Counter<0> responses_total("libmicrohttpd_http_responses_total",
+                           "Number of processed HTTP responses.");
+
+void record_stats_before_queue_response(struct MHD_Connection* connection,
+                                        int http_status,
+                                        struct MHD_Response* response) {
+  responses_total.inc();
 }
 
 void install_process_exports() {

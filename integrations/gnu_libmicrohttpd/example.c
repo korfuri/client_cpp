@@ -20,6 +20,7 @@ static int ahc_echo(void * cls,
   struct MHD_Response * response;
   int ret;
 
+  record_stats_before_access_handler(connection, url, method, version, upload_data, upload_data_size);
   if (0 != strcmp(method, "GET"))
     return MHD_NO; /* unexpected method */
   if (!strcmp(url, "/metrics")) {
@@ -40,6 +41,7 @@ static int ahc_echo(void * cls,
                                              MHD_NO,
                                              MHD_NO);
   }
+  record_stats_before_queue_response(connection, MHD_HTTP_OK, response);
   ret = MHD_queue_response(connection,
 			   MHD_HTTP_OK,
 			   response);
