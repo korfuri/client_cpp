@@ -48,6 +48,7 @@ static int ahc_echo(void * cls,
 }
 
 int main() {
+  install_process_exports();
   struct MHD_Daemon * d;
   d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
 		       8080,

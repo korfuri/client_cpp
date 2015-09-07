@@ -17,6 +17,11 @@ extern "C" {
   // should destroy it with MHD_destroy_response.
   struct MHD_Response* handle_metrics(struct MHD_Connection* connection);
 
+  // Installs the standard exports in the current process. You
+  // probably want to call this in your main(). Exports can't be
+  // uninstalled.
+  void install_process_exports();
+
 #ifdef __cplusplus
 };
 #endif  /* __cplusplus */
