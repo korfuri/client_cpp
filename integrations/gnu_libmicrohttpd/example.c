@@ -41,7 +41,7 @@ static int ahc_echo(void * cls,
                                              MHD_NO,
                                              MHD_NO);
   }
-  record_stats_before_queue_response(connection, MHD_HTTP_OK, response);
+  record_stats_before_queue_response(MHD_HTTP_OK, response);
   ret = MHD_queue_response(connection,
 			   MHD_HTTP_OK,
 			   response);

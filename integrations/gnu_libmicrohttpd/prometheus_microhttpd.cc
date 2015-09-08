@@ -47,9 +47,9 @@ MHD_Response* handle_metrics(struct MHD_Connection* connection) {
 
 using prometheus::Counter;
 
-Counter<1> requests_total("libmicrohttpd_http_requests_by_transport_total",
+Counter<2> requests_total("libmicrohttpd_http_requests_by_transport_method_total",
                           "Number of processed HTTP requests.",
-                          {{"transport"}});
+                          {"transport", "method"});
 
 void record_stats_before_access_handler(struct MHD_Connection* connection,
                                         const char* url,
@@ -58,19 +58,28 @@ void record_stats_before_access_handler(struct MHD_Connection* connection,
                                         const char* upload_data,
                                         size_t* upload_data_size) {
   const union MHD_ConnectionInfo* connection_info;
-  // SSL or not?
+
   connection_info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_PROTOCOL);
   const std::string transport = (connection_info != NULL) ? "https" : "http";
-  requests_total.labels({{transport}}).inc();
+
+  if (strcmp("GET", method) && strcmp("HEAD", method) &&
+      strcmp("POST", method) && strcmp("PUT", method) &&
+      strcmp("DELETE", method) && strcmp("TRACE", method) &&
+      strcmp("OPTIONS", method) && strcmp("CONNECT", method) &&
+      strcmp("PATCH", method)) {
+    method = "<invalid method>";
+  }
+
+  requests_total.labels({transport, std::string(method)}).inc();
 }
 
-Counter<0> responses_total("libmicrohttpd_http_responses_total",
-                           "Number of processed HTTP responses.");
+Counter<1> responses_total("libmicrohttpd_http_responses_by_status_total",
+                           "Number of processed HTTP responses by HTTP status.",
+                           {"status"});
 
-void record_stats_before_queue_response(struct MHD_Connection* connection,
-                                        int http_status,
+void record_stats_before_queue_response(int http_status,
                                         struct MHD_Response* response) {
-  responses_total.inc();
+  responses_total.labels({std::to_string(http_status)}).inc();
 }
 
 void install_process_exports() {

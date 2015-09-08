@@ -22,8 +22,7 @@ extern "C" {
 
   // Records stats just before sending a response.
   // Call this just before calling MHD_queue_response.
-  void record_stats_before_queue_response(struct MHD_Connection* connection,
-                                          int http_status,
+  void record_stats_before_queue_response(int http_status,
                                           struct MHD_Response* response);
 
   // Handles a /metrics request. The caller is responsible for

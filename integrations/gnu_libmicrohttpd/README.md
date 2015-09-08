@@ -2,7 +2,8 @@
 
 ## Status
 
-In progress.
+Working example. The exposition itself works, and libmicrohttpd is
+minimally instrumented.
 
 ## How to test
 
