@@ -4,6 +4,8 @@
 #include <prometheus/output_formatter.hh>
 #include <prometheus/standard_exports.hh>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <microhttpd.h>
 #include <string>
 #include <sstream>

@@ -1,7 +1,10 @@
-#include <microhttpd.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <microhttpd.h>
 #include "prometheus_microhttpd.h"
 
 #define PAGE "<html><head><title>libmicrohttpd demo</title>"\
