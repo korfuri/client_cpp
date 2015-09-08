@@ -17,6 +17,8 @@ addons:
       - zip
       # - g++  # provided by g++-4.9
       - zlib1g-dev
+      ## For integrations
+      - libmicrohttpd-dev
 
 # Eventually, Bazel will have binary packages and we'll be able to
 # just download a prebuilt distribution of Bazel. For now, build it
@@ -31,3 +33,6 @@ before_install:
 
 script:
   - bazel/output/bazel test //prometheus/...
+  - pushd integrations/gnu_libmicrohttpd
+  - make
+  - popd
