@@ -161,10 +161,6 @@ namespace prometheus {
       throw impl::OutputFormatterException(
 	impl::OutputFormatterException::kMissingRequiredField);
     }
-    if (mf->metric_size() <= 0) {
-      throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kEmptyMetricFamily);
-    }
     std::string escaped_name = escape_metric_name(mf->name());
     os << "# HELP " << escaped_name << ' ' << escape_help(mf->help())
        << std::endl;
@@ -220,8 +216,6 @@ namespace prometheus {
 
   namespace impl {
 
-    const char* const OutputFormatterException::kEmptyMetricFamily =
-      "No metrics in metric family.";
     const char* const OutputFormatterException::kInvalidMetricType =
       "Invalid metric type.";
     const char* const OutputFormatterException::kMissingRequiredField =

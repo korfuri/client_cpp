@@ -65,8 +65,11 @@ namespace prometheus {
     using ::prometheus::client::Metric;
     using ::prometheus::client::MetricFamily;
 
-    void BaseGaugeValue::collect_value(Metric* m, MetricFamily* mf) const {
+    void BaseGaugeValue::collect_value(Metric* m) const {
       m->mutable_gauge()->set_value(value_);
+    }
+
+    /* static */ void BaseGaugeValue::set_metricfamily_type(MetricFamily* mf) {
       mf->set_type(::prometheus::client::MetricType::GAUGE);
     }
 
@@ -87,8 +90,11 @@ namespace prometheus {
         ;
     }
 
-    void CounterValue::collect_value(Metric* m, MetricFamily* mf) const {
+    void CounterValue::collect_value(Metric* m) const {
       m->mutable_counter()->set_value(value_);
+    }
+
+    /* static */ void CounterValue::set_metricfamily_type(MetricFamily* mf) {
       mf->set_type(::prometheus::client::MetricType::COUNTER);
     }
 
@@ -156,9 +162,8 @@ namespace prometheus {
       }
     }
 
-    void HistogramValue::collect_value(Metric* m, MetricFamily* mf) const {
+    void HistogramValue::collect_value(Metric* m) const {
       Histogram* h = m->mutable_histogram();
-      mf->set_type(::prometheus::client::MetricType::HISTOGRAM);
       auto it = values_.begin();
       {
         std::lock_guard<std::mutex> l(mutex_);
@@ -172,5 +177,10 @@ namespace prometheus {
         }
       }
     }
+
+    /* static */ void HistogramValue::set_metricfamily_type(MetricFamily* mf) {
+      mf->set_type(::prometheus::client::MetricType::HISTOGRAM);
+    }
+
   }
 }

@@ -74,7 +74,7 @@ namespace {
     MetricFamily mf;
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: COUNTER", &mf));
-    EXPECT_THROW(metricfamily_proto_to_string(&mf), OutputFormatterException);
+    EXPECT_NO_THROW(metricfamily_proto_to_string(&mf));
   }
 
   TEST_F(OutputFormatterTest, NoType) {

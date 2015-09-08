@@ -62,7 +62,8 @@ namespace prometheus {
       // "Inc/Dec" gauges from "Set" gauges to allow us to squeeze
       // some performance by using different types of memory barriers.
      public:
-      void collect_value(Metric* m, MetricFamily* mf) const;
+      void collect_value(Metric* m) const;
+      static void set_metricfamily_type(MetricFamily* mf);
     };
 
     class SetGaugeValue : public BaseGaugeValue {
@@ -85,7 +86,8 @@ namespace prometheus {
       // NegativeCounterIncrementException.
      public:
       void inc(double value = 1.0);
-      void collect_value(Metric* m, MetricFamily* mf) const;
+      void collect_value(Metric* m) const;
+      static void set_metricfamily_type(MetricFamily* mf);
     };
 
     class HistogramValue {
@@ -114,8 +116,11 @@ namespace prometheus {
       // total count of observed values.
       double value(double threshold = kInf) const;
 
-      // Collects the value to a MetricFamily.
-      void collect_value(Metric* m, MetricFamily* mf) const;
+      // Collects the value to a Metric.
+      void collect_value(Metric* m) const;
+
+      // Sets the type of a MetricFamily that contains this kind of Value.
+      static void set_metricfamily_type(MetricFamily* mf);
 
      private:
       mutable std::mutex mutex_;

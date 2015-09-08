@@ -32,7 +32,6 @@ namespace prometheus {
 	: reason_(reason) {}
       virtual const char* what() const noexcept { return reason_; }
 
-      static const char* const kEmptyMetricFamily;
       static const char* const kInvalidMetricType;
       static const char* const kMissingRequiredField;
       static const char* const kSummariesNotImplemented;

@@ -130,6 +130,7 @@ namespace prometheus {
       // MetricFamily.
       virtual void collect(MetricFamily* mf) const {
         collect_internal(mf);
+        ValueType::set_metricfamily_type(mf);
         std::unique_lock<std::mutex> l(mutex_);
         for (const auto& it_v : values_) {
           Metric* m = add_metric(mf);
@@ -141,7 +142,7 @@ namespace prometheus {
             ++it_labelname;
             ++it_labelvalue;
           }
-          it_v.second.collect_value(m, mf);
+          it_v.second.collect_value(m);
         }
       }
 
@@ -179,7 +180,8 @@ namespace prometheus {
       // Collects the metric and its value to a MetricFamily protobuf.
       virtual void collect(MetricFamily* mf) const {
         collect_internal(mf);
-        this->collect_value(add_metric(mf), mf);
+        ValueType::set_metricfamily_type(mf);
+        this->collect_value(add_metric(mf));
       }
     };
 
