@@ -38,9 +38,10 @@ MHD_Response* handle_metrics(struct MHD_Connection* connection) {
   /* } */
   /* printf("Accepting: %s\n", accept_header); */
   std::string s = collect_as_text_format_to_string();
-  MHD_Response* response = MHD_create_response_from_buffer(s.length(),
-                                                           (void*)s.c_str(),
-                                                           MHD_RESPMEM_MUST_COPY);
+  MHD_Response* response = MHD_create_response_from_data(s.length(),
+                                                         (void*)s.c_str(),
+                                                         MHD_NO,
+                                                         MHD_YES);
   if (response) {
     MHD_add_response_header(response, "Content-Type", TEXT_FORMAT_CONTENT_TYPE);
   }
