@@ -1,7 +1,8 @@
 # Prometheus C++ client library
 
-This is a client library for C++ for
-[Prometheus](https://prometheus.io).
+This is a client library for C++ for [Prometheus](https://prometheus.io).
+
+[![Build Status](https://travis-ci.org/korfuri/client_cpp.svg?branch=master)](https://travis-ci.org/korfuri/client_cpp)
 
 # Getting started
 
