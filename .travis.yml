@@ -24,15 +24,14 @@ addons:
 # just download a prebuilt distribution of Bazel. For now, build it
 # from source every time.
 before_install:
-  - git clone https://github.com/google/bazel.git
-  - pushd bazel
-  - git checkout d93990f9ae43146dba1e6b57730907b69685a75f
-  - cp -r ../tools/bazel-travis/custom_crosstool ./custom_crosstool
-  - BAZELRC=../tools/bazel-travis/bazelrc ./compile.sh
-  - popd
+  - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.0/bazel-0.1.0-installer-linux-x86_64.sh'
+  - sha256sum -c tools/bazel-0.1.0-installer-linux-x86_64.sh.sha256
+  - chmod +x bazel-0.1.0-installer-linux-x86_64.sh
+  - ./bazel-0.1.0-installer-linux-x86_64.sh --user
+  - cat ~/.bazelrc >> .bazelrc
 
 script:
-  - bazel/output/bazel test //prometheus/...
+  - bazel test //prometheus/...
   - pushd integrations/gnu_libmicrohttpd
   - make
   - popd
