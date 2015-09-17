@@ -9,6 +9,48 @@
 namespace prometheus {
   namespace impl {
 
+    struct ProcSelfStatReader {
+
+      ProcSelfStatReader() {
+        std::ifstream in("/proc/self/stat");
+        // Extracts all fields from /proc/self/stat. This assumes a
+        // Linux 2.6 distro (importantly, times are expressed in ticks
+        // and not in jffies). Not all fields are actually used for
+        // exports.
+        in
+          >> pid >> filename >> state >> ppid >> pgrp
+          >> session >> ttynr >> tpgid >> flags >> minflt
+          >> cminflt >> majflt >> cmajflt >> utime >> stime
+          >> cutime >> cstime >> priority >> nice >> numthreads
+          >> itrealvalue >> starttime >> vsize >> rss;
+      }
+
+      char state;
+      int pid, ppid, pgrp, session, ttynr, tpgid;
+      unsigned int flags;
+      unsigned long int minflt, cminflt, majflt, cmajflt, utime, stime;
+      long int cutime, cstime, priority, nice, numthreads, itrealvalue;
+      unsigned long long int starttime;
+      unsigned long int vsize;
+      long int rss;
+      std::string filename;
+    };
+
+    struct ProcStatReader {
+      ProcStatReader() {
+        std::ifstream in("/proc/stat");
+        std::string line;
+        while (in.good()) {
+          std::getline(in, line);
+          if (line.compare(0, 6, "btime ") == 0) {
+            btime = std::stoi(line.substr(6));
+          }
+        }
+      }
+
+      int btime;
+    };
+
     class ProcessCollector : public ICollector {
     private:
       // Convenience function to add a gauge to the list of
@@ -41,36 +83,15 @@ namespace prometheus {
 
       std::list<MetricFamily*> collect() const {
         std::list<MetricFamily*> l;
-        std::ifstream in("/proc/self/stat");
-        int pid;
-        std::string filename;
+        ProcSelfStatReader pss;
+        ProcStatReader ps;
 
-        // Extracts all fields from /proc/self/stat. This assumes a
-        // Linux 2.6 distro (importantly, times are expressed in ticks
-        // and not in jffies). Not all fields are actually used for
-        // exports.
-        char state;
-        int ppid, pgrp, session, ttynr, tpgid;
-        unsigned int flags;
-        unsigned long int minflt, cminflt, majflt, cmajflt, utime, stime;
-        long int cutime, cstime, priority, nice, numthreads, itrealvalue;
-        unsigned long long int starttime;
-        unsigned long int vsize;
-        long int rss;
-        in
-          >> pid >> filename >> state >> ppid >> pgrp
-          >> session >> ttynr >> tpgid >> flags >> minflt
-          >> cminflt >> majflt >> cmajflt >> utime >> stime
-          >> cutime >> cstime >> priority >> nice >> numthreads
-          >> itrealvalue >> starttime >> vsize >> rss;
-
-        set_gauge(l, "process_virtual_memory_bytes", "Virtual memory size in bytes (vsize)", vsize);
-        set_gauge(l, "process_resident_memory_bytes", "Resident memory size in bytes (rss)", rss * pagesize_);
-        int btime = 0; // TODO(korfuri): Get this from /proc/stat
-        set_gauge(l, "process_start_time_seconds", "Start time of the process since unix epoch in seconds.", starttime / ticks_per_ms_ + btime);
-        set_gauge(l, "process_cpu_seconds_total", "Total user and system CPU time spent in seconds.", (double)(utime + stime) / ticks_per_ms_);
-        // TODO(korfuri): process_open_fds
-        // TODO(korfuri): process_max_fds
+        set_gauge(l, "process_virtual_memory_bytes", "Virtual memory size in bytes (vsize)", pss.vsize);
+        set_gauge(l, "process_resident_memory_bytes", "Resident memory size in bytes (rss)", pss.rss * pagesize_);
+        set_gauge(l, "process_start_time_seconds", "Start time of the process since unix epoch in seconds.", pss.starttime / ticks_per_ms_ + ps.btime);
+        set_gauge(l, "process_cpu_seconds_total", "Total user and system CPU time spent in seconds.", (double)(pss.utime + pss.stime) / ticks_per_ms_);
+        // TODO(korfuri): process_open_fds, get this from ls(/prod/fd/*)
+        // TODO(korfuri): process_max_fds, get this from /proc/self/limits
         return l;
       }
     };
