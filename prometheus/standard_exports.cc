@@ -3,6 +3,10 @@
 #include "standard_exports.hh"
 #include "prometheus/proto/metrics.pb.h"
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <dirent.h>
+#include <errno.h>
 #include <fstream>
 #include <iostream>
 
@@ -48,7 +52,44 @@ namespace prometheus {
         }
       }
 
-      int btime;
+      long int btime;
+    };
+
+    struct ProcSelfFdReader {
+      class OpenDirException {};
+
+      ProcSelfFdReader() : num_open_files(0) {
+        DIR* dir = opendir("/proc/self/fd");
+        if (dir == nullptr) {
+          throw OpenDirException();
+        }
+
+        errno = 0;
+        while (readdir(dir)) {
+          ++num_open_files;
+        }
+        closedir(dir);
+        if (errno) {
+          throw OpenDirException();
+        }
+      }
+
+      rlim_t num_open_files;
+    };
+
+    struct ProcSelfLimitsReader {
+      ProcSelfLimitsReader() {
+        std::ifstream in("/proc/self/limits");
+        std::string line;
+        while (in.good()) {
+          std::getline(in, line);
+          if (line.compare(0, 14, "Max open files") == 0) {
+            max_open_files = std::stoi(line.substr(14));
+          }
+        }
+      }
+
+      rlim_t max_open_files;
     };
 
     class ProcessCollector : public ICollector {
@@ -85,13 +126,15 @@ namespace prometheus {
         std::list<MetricFamily*> l;
         ProcSelfStatReader pss;
         ProcStatReader ps;
+        ProcSelfFdReader psfd;
+        ProcSelfLimitsReader psl;
 
         set_gauge(l, "process_virtual_memory_bytes", "Virtual memory size in bytes (vsize)", pss.vsize);
         set_gauge(l, "process_resident_memory_bytes", "Resident memory size in bytes (rss)", pss.rss * pagesize_);
         set_gauge(l, "process_start_time_seconds", "Start time of the process since unix epoch in seconds.", pss.starttime / ticks_per_ms_ + ps.btime);
         set_gauge(l, "process_cpu_seconds_total", "Total user and system CPU time spent in seconds.", (double)(pss.utime + pss.stime) / ticks_per_ms_);
-        // TODO(korfuri): process_open_fds, get this from ls(/prod/fd/*)
-        // TODO(korfuri): process_max_fds, get this from /proc/self/limits
+        set_gauge(l, "process_open_fds", "Number of open file descriptors.", psfd.num_open_files);
+        set_gauge(l, "process_max_fds", "Maximum number of open file descriptors.", psl.max_open_files);
         return l;
       }
     };
