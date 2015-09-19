@@ -29,3 +29,20 @@ not using Bazel, you'll need:
 TODO :) This is not quite final yet. You are welcome to use the
 library but I don't consider it fully stable yet. Contributions (bug
 reports, pull requests, suggestions) are welcome!
+
+# Performance
+
+tl;dr: get your own stats by running `bazel test prometheus:benchmark_test`.
+
+On my desktop (quad core i5 @3.4GHz), I get the following results:
+
+| Test                                                          | 1 thread | 10 threads | 100 threads |
+|---------------------------------------------------------------|----------|------------|-------------|
+| Increment a counter 1M times/thread                           | 23.53ms  | 857ms      | 8881ms      |
+| Increment gauge 1M times/thread                               | 23.57ms  | 888ms      | 8955ms      |
+| Set a gauge 1M times/thread                                   | 22.95ms  | 194ms      | 1931ms      |
+| Create 10k labels/thread                                      |  6.97ms  | 113ms      | 1047ms      |
+| Observe 100k values (uniform distribution) in a histogram     | 42.69ms  | 722ms      | 7473ms      |
+| Observe 100k values (exponential distribution) in a histogram | 48.78ms  | 783ms      | 7849ms      |
+
+For full details on what the tests are doing, check out `prometheus/benchmark_test.cc`.
