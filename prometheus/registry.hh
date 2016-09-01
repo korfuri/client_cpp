@@ -5,7 +5,7 @@
 #include "proto/stubs.hh"
 
 #include <ostream>
-#include <mutex>
+#include <shared_mutex>
 #include <list>
 #include <vector>
 
@@ -39,7 +39,7 @@ namespace prometheus {
       CollectorRegistry(CollectorRegistry const&) = delete;
       CollectorRegistry operator=(CollectorRegistry const&) = delete;
 
-      mutable std::mutex mutex_;
+      mutable std::shared_timed_mutex mutex_;
       std::vector<ICollector*> collectors_;
     };
 

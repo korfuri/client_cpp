@@ -3,7 +3,7 @@
 
 #include "proto/stubs.hh"
 
-#include <mutex>
+#include <shared_mutex>
 #include <list>
 #include <stdexcept>
 #include <vector>
@@ -65,7 +65,7 @@ namespace prometheus {
       Collector& operator=(Collector const&) = delete;
 
       std::vector<AbstractMetric*> metrics_;
-      mutable std::mutex mutex_;
+      mutable std::shared_timed_mutex mutex_;
     };
 
     extern Collector global_collector;

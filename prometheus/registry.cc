@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 namespace prometheus {
@@ -19,7 +20,7 @@ namespace prometheus {
     CollectorRegistry::~CollectorRegistry() {}
 
     void CollectorRegistry::register_collector(ICollector* collector) {
-      std::unique_lock<std::mutex> l(mutex_);
+      std::unique_lock<std::shared_timed_mutex> l(mutex_);
       if (std::find(collectors_.begin(), collectors_.end(), collector) !=
           collectors_.end()) {
         throw err::CollectorManagementException();
@@ -28,7 +29,7 @@ namespace prometheus {
     }
 
     void CollectorRegistry::unregister_collector(ICollector* collector) {
-      std::unique_lock<std::mutex> l(mutex_);
+      std::unique_lock<std::shared_timed_mutex> l(mutex_);
       auto it = std::find(collectors_.begin(), collectors_.end(), collector);
       if (it == collectors_.end()) {
         throw err::CollectorManagementException();
@@ -37,7 +38,7 @@ namespace prometheus {
     }
 
     std::list<MetricFamily*> CollectorRegistry::collect() const {
-      std::unique_lock<std::mutex> l(mutex_);
+      std::shared_lock<std::shared_timed_mutex> l(mutex_);
       std::list<MetricFamily*> metrics;
       for (auto const& c : collectors_) {
 	try {

@@ -4,6 +4,7 @@
 #include "prometheus/proto/metrics.pb.h"
 
 #include <mutex>
+#include <shared_mutex>
 #include <list>
 
 namespace prometheus {
@@ -19,13 +20,13 @@ namespace prometheus {
     Collector::~Collector() {}
 
     void Collector::register_metric(AbstractMetric* metric) {
-      std::unique_lock<std::mutex> l(mutex_);
+      std::unique_lock<std::shared_timed_mutex> l(mutex_);
       metrics_.push_back(metric);
     }
 
     std::list<MetricFamily*> Collector::collect() const {
       std::list<MetricFamily*> v;
-      std::unique_lock<std::mutex> l(mutex_);
+      std::shared_lock<std::shared_timed_mutex> l(mutex_);
       for (auto const m : metrics_) {
         auto* mf = new MetricFamily;
         m->collect(mf);
