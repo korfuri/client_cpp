@@ -6,17 +6,22 @@ This is a client library for C++ for [Prometheus](https://prometheus.io).
 
 # Getting started
 
-This project uses [Bazel](http://bazel.io) to build. I welcome
-contributions to make it work on other build systems, as Bazel is kind
-of special in the way it interacts with non-Bazel projects.
+This project uses [Bazel](http://bazel.io) or CMake to build
 
-## Requirements
+## Requirements for Bazel
   * [Bazel](http://bazel.io)
   * `apt-get install g++-4.9` or higher
   * `apt-get install libicu-dev` for Unicode support
   * `apt-get install libprotobuf-dev protobuf-compiler` for Protocol Buffers
 
-## Requirements when not using Bazel
+## Requirements for CMake
+
+  * `apt-get install libicu-dev` for Unicode support
+  * `apt-get install libprotobuf-dev protobuf-compiler` for Protocol Buffers
+
+NOTE: Test execution in CMake has not been implemented.
+
+## Requirements for tests when not using Bazel
 
 The Bazel workspace will pull these automatically for you. If you're
 not using Bazel, you'll need:
