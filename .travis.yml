@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 addons:
   apt:
     sources:
@@ -5,6 +7,7 @@ addons:
     packages:
       - gcc-4.9
       - g++-4.9
+      - cmake
       ## We need a system-wide libicu
       - libicu-dev
       ## We also depend on a system install of protobuf
@@ -32,6 +35,12 @@ before_install:
 
 script:
   - bazel test //prometheus/...
+  - mkdir build/
+  - pushd build
+  - CC=gcc-4.9 CXX=g++-4.9 cmake ..
+  - make -j3
+  - prometheus/client_demo
+  - popd
   - pushd integrations/gnu_libmicrohttpd
   - make
   - popd
