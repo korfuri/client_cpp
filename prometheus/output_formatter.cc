@@ -53,7 +53,7 @@ namespace prometheus {
       metric_labels_proto_to_ostream(m, ss);
       ss << '}';
     }
-    ss << " = ";
+    ss << " ";
   }
 
   void counter_proto_to_ostream(std::string const& escaped_name,
@@ -107,7 +107,7 @@ namespace prometheus {
       // TODO(korfuri): Do we need quotes around the value here?
       // le="0.1" or le=0.1?
       ss << "le=\"" << escape_double(b.upper_bound())
-	 << "\"} = " << b.cumulative_count() << std::endl;
+	 << "\"} " << b.cumulative_count() << std::endl;
     }
   }
 

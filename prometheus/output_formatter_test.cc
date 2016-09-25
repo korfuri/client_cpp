@@ -21,7 +21,7 @@ namespace {
     EXPECT_EQ(
         "# HELP a b\n"
         "# TYPE a counter\n"
-        "a = 4.2\n",
+        "a 4.2\n",
         s);
   }
 
@@ -35,7 +35,7 @@ namespace {
     EXPECT_EQ(
         "# HELP a b\n"
         "# TYPE a gauge\n"
-        "a = 4.2\n",
+        "a 4.2\n",
         s);
   }
 
@@ -50,7 +50,7 @@ namespace {
     EXPECT_EQ(
         "# HELP a b\n"
         "# TYPE a untyped\n"
-        "a = 4.2\n",
+        "a 4.2\n",
         s);
   }
 
