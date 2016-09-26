@@ -1,64 +1,64 @@
 # -*- mode: text; coding: utf-8-unix -*-
 # HELP blips_total Total number of blips.
 # TYPE blips_total gauge
-blips_total = 4.2
+blips_total 4.2
 # HELP blops_by_blarg_total Total number of blops for each blarg.
 # TYPE blops_by_blarg_total gauge
-blops_by_blarg_total{blarg="blub"} = 8.6
-blops_by_blarg_total{blarg="grunt"} = 1.3
+blops_by_blarg_total{blarg="blub"} 8.6
+blops_by_blarg_total{blarg="grunt"} 1.3
 # HELP blops_by_blarg_blurg_total Total number of blops for each (blarg,blurg).
 # TYPE blops_by_blarg_blurg_total gauge
-blops_by_blarg_blurg_total{blarg="blub",blurg="knux"} = 8.2
-blops_by_blarg_blurg_total{blarg="grunt",blurg="knux"} = 1.5
-blops_by_blarg_blurg_total{blarg="blub",blurg="knix"} = 8.6
-blops_by_blarg_blurg_total{blarg="grunt",blurg="knix"} = 1.3
+blops_by_blarg_blurg_total{blarg="blub",blurg="knux"} 8.2
+blops_by_blarg_blurg_total{blarg="grunt",blurg="knux"} 1.5
+blops_by_blarg_blurg_total{blarg="blub",blurg="knix"} 8.6
+blops_by_blarg_blurg_total{blarg="grunt",blurg="knix"} 1.3
 # HELP bloops_total Total number of bloops.
 # TYPE bloops_total counter
-bloops_total = 5.2
+bloops_total 5.2
 # HELP blups Distribution of blups.
 # TYPE blups histogram
-blups{le="0.005"} = 0
-blups{le="0.01"} = 0
-blups{le="0.025"} = 0
-blups{le="0.05"} = 0
-blups{le="0.075"} = 0
-blups{le="0.1"} = 0
-blups{le="0.25"} = 0
-blups{le="0.5"} = 1
-blups{le="0.75"} = 1
-blups{le="1"} = 1
-blups{le="2.5"} = 1
-blups{le="5"} = 2
-blups{le="7.5"} = 2
-blups{le="10"} = 3
-blups{le="+Inf"} = 4
+blups{le="0.005"} 0
+blups{le="0.01"} 0
+blups{le="0.025"} 0
+blups{le="0.05"} 0
+blups{le="0.075"} 0
+blups{le="0.1"} 0
+blups{le="0.25"} 0
+blups{le="0.5"} 1
+blups{le="0.75"} 1
+blups{le="1"} 1
+blups{le="2.5"} 1
+blups{le="5"} 2
+blups{le="7.5"} 2
+blups{le="10"} 3
+blups{le="+Inf"} 4
 # HELP blups_by_blip_blop Distribution of blups by blip and blop.
 # TYPE blups_by_blip_blop histogram
-blups_by_blip_blop{blip="a",blop="b",le="0"} = 0
-blups_by_blip_blop{blip="a",blop="b",le="1"} = 1
-blups_by_blip_blop{blip="a",blop="b",le="10"} = 2
-blups_by_blip_blop{blip="a",blop="b",le="100"} = 2
-blups_by_blip_blop{blip="a",blop="b",le="1000"} = 2
-blups_by_blip_blop{blip="a",blop="b",le="10000"} = 2
-blups_by_blip_blop{blip="a",blop="b",le="+Inf"} = 2
-blups_by_blip_blop{blip="a",blop="c",le="0"} = 0
-blups_by_blip_blop{blip="a",blop="c",le="1"} = 0
-blups_by_blip_blop{blip="a",blop="c",le="10"} = 1
-blups_by_blip_blop{blip="a",blop="c",le="100"} = 1
-blups_by_blip_blop{blip="a",blop="c",le="1000"} = 1
-blups_by_blip_blop{blip="a",blop="c",le="10000"} = 1
-blups_by_blip_blop{blip="a",blop="c",le="+Inf"} = 1
-blups_by_blip_blop{blip="e",blop="d",le="0"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="1"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="10"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="100"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="1000"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="10000"} = 0
-blups_by_blip_blop{blip="e",blop="d",le="+Inf"} = 1
+blups_by_blip_blop{blip="a",blop="b",le="0"} 0
+blups_by_blip_blop{blip="a",blop="b",le="1"} 1
+blups_by_blip_blop{blip="a",blop="b",le="10"} 2
+blups_by_blip_blop{blip="a",blop="b",le="100"} 2
+blups_by_blip_blop{blip="a",blop="b",le="1000"} 2
+blups_by_blip_blop{blip="a",blop="b",le="10000"} 2
+blups_by_blip_blop{blip="a",blop="b",le="+Inf"} 2
+blups_by_blip_blop{blip="a",blop="c",le="0"} 0
+blups_by_blip_blop{blip="a",blop="c",le="1"} 0
+blups_by_blip_blop{blip="a",blop="c",le="10"} 1
+blups_by_blip_blop{blip="a",blop="c",le="100"} 1
+blups_by_blip_blop{blip="a",blop="c",le="1000"} 1
+blups_by_blip_blop{blip="a",blop="c",le="10000"} 1
+blups_by_blip_blop{blip="a",blop="c",le="+Inf"} 1
+blups_by_blip_blop{blip="e",blop="d",le="0"} 0
+blups_by_blip_blop{blip="e",blop="d",le="1"} 0
+blups_by_blip_blop{blip="e",blop="d",le="10"} 0
+blups_by_blip_blop{blip="e",blop="d",le="100"} 0
+blups_by_blip_blop{blip="e",blop="d",le="1000"} 0
+blups_by_blip_blop{blip="e",blop="d",le="10000"} 0
+blups_by_blip_blop{blip="e",blop="d",le="+Inf"} 1
 # HELP unicode_metric This metric tests üñíçøđè support
 # TYPE unicode_metric counter
-unicode_metric{label="valüe"} = 1
-unicode_metric{label="🍌"} = 2
+unicode_metric{label="valüe"} 1
+unicode_metric{label="🍌"} 2
 # HELP prometheus_client_collection_errors_total Count of exceptions raised by collectors during the metric collection process.
 # TYPE prometheus_client_collection_errors_total counter
-prometheus_client_collection_errors_total = 0
+prometheus_client_collection_errors_total 0
