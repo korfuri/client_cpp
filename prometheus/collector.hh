@@ -28,6 +28,8 @@ namespace prometheus {
    public:
     virtual ~ICollector() {}
 
+    typedef std::list<impl::MetricFamily*> collection_type;
+
     // Returns a list of MetricFamily protobufs ready to be
     // exported. The called gain ownership of all allocated
     // MetricFamily objects. This method must be thread-safe. It may
@@ -37,7 +39,7 @@ namespace prometheus {
     // happen. Other exceptions will interrupt the registry's
     // collection process and no metrics will be exposed for this
     // collection of the whole registry.
-    virtual std::list<impl::MetricFamily*> collect() const = 0;
+    virtual collection_type collect() const = 0;
   };
 
   class CollectionException : public std::runtime_error {};
@@ -54,7 +56,7 @@ namespace prometheus {
       virtual ~Collector();
 
       // See ICollector::collect.
-      virtual std::list<MetricFamily*> collect() const;
+      virtual collection_type collect() const;
 
       // Registers a metric with this Collector. The metric
       // can't be unregistered.

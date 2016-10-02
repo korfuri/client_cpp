@@ -23,7 +23,7 @@ namespace prometheus {
       metrics_.push_back(metric);
     }
 
-    std::list<MetricFamily*> Collector::collect() const {
+    Collector::collection_type Collector::collect() const {
       std::list<MetricFamily*> v;
       impl::shared_lock<impl::shared_timed_mutex> l(mutex_);
       for (auto const m : metrics_) {

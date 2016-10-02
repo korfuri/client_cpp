@@ -12,8 +12,6 @@
 namespace prometheus {
   namespace impl {
 
-    using ::prometheus::client::MetricFamily;
-
     class CollectorRegistry {
       // A CollectorRegistry is the main interface through which
       // collection happens. A CollectorRegistry contains a list of
@@ -23,10 +21,12 @@ namespace prometheus {
       CollectorRegistry();
       ~CollectorRegistry();
 
+      using collection_type = Collector::collection_type;
+
       // Returns a list of MetricFamily protobufs ready to be
       // exported. The called gain ownership of all allocated
       // MetricFamily objects and must delete them to avoid leaks.
-      std::list<MetricFamily*> collect() const;
+      collection_type collect() const;
 
       // Register or unregister a collector. Registered collectors are
       // included in collections. Registering a collector twice, or

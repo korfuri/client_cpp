@@ -36,12 +36,12 @@ namespace prometheus {
       collectors_.erase(it);
     }
 
-    std::list<MetricFamily*> CollectorRegistry::collect() const {
+    CollectorRegistry::collection_type CollectorRegistry::collect() const {
       impl::shared_lock<impl::shared_timed_mutex> l(mutex_);
-      std::list<MetricFamily*> metrics;
+      collection_type metrics;
       for (auto const& c : collectors_) {
 	try {
-	  std::list<MetricFamily*> collected_metrics = c->collect();
+	  collection_type collected_metrics = c->collect();
 	  metrics.splice(metrics.begin(), collected_metrics);
 	} catch (CollectionException const&) {
 	  collection_errors.inc();
