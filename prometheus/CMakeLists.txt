@@ -1,15 +1,21 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 project("prometheus-client")
 set(PROJECT_VERSION "0.99")
 set(PROJECT_DESCRIPTION "Prometheus C++ client library")
+set(CMAKE_MACOSX_RPATH true)
 
 include(GNUInstallDirs)
 include(FindPkgConfig)
+if (APPLE)
+  # Find homebrew's libicu on Mac OS although it is hidden pretty well
+  set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/icu4c/lib/pkgconfig")
+endif()
 pkg_check_modules(ICU REQUIRED icu-io icu-i18n icu-uc)
 pkg_check_modules(PB REQUIRED protobuf)
 
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${ICU_INCLUDE_DIRS})
+link_directories(${ICU_LIBRARY_DIRS})
 
 add_library(prometheus-client SHARED
   collector.cc exceptions.cc metrics.cc output_formatter.cc
@@ -22,13 +28,17 @@ add_custom_command(
   COMMAND protoc -I${CMAKE_SOURCE_DIR}/prometheus/proto
   ${CMAKE_SOURCE_DIR}/prometheus/proto/metrics.proto  --cpp_out=proto/)
 
-target_link_libraries(prometheus-client PUBLIC
-  ${ICU_LIBRARIES} ${PB_LIBRARIES})
-set_target_properties(prometheus-client PROPERTIES VERSION "0")
-set_target_properties(prometheus-client PROPERTIES SOVERSION "0.0.0")
+target_link_libraries(prometheus-client
+                      PUBLIC ${PB_LIBRARIES}
+                      PRIVATE ${ICU_LIBRARIES})
+set_target_properties(prometheus-client PROPERTIES
+                      VERSION "0"
+                      SOVERSION "0.0.0")
+target_compile_options(prometheus-client PRIVATE ${PROMETHEUS_CLIENT_CXX_STANDARD})
 
 add_executable(client_demo client_demo_main.cc)
 target_link_libraries(client_demo prometheus-client)
+target_compile_options(client_demo PRIVATE ${PROMETHEUS_CLIENT_CXX_STANDARD})
 
 set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
 set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include/")
