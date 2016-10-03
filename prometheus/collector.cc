@@ -23,7 +23,7 @@ namespace prometheus {
       metrics_.push_back(metric);
     }
 
-    Collector::collection_type Collector::collect() const {
+    collection_type Collector::collect() const {
       collection_type v;
       impl::shared_lock<impl::shared_timed_mutex> l(mutex_);
       for (auto const m : metrics_) {

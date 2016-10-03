@@ -7,6 +7,8 @@
 #include <stdexcept>
 
 #include <unicode/unistr.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/io/coded_stream.h>
 
 namespace prometheus {
 
@@ -15,6 +17,76 @@ namespace prometheus {
   using ::prometheus::client::LabelPair;
   using ::prometheus::client::Metric;
   using ::prometheus::client::MetricType;
+
+  std::string
+  render(collection_type const& collection, exposition_format format) {
+    switch (format) {
+    case fmt_text:  return collection_to_text(collection);
+    case fmt_proto: return collection_to_proto_delimited(collection);
+    }
+    return "";
+  }
+
+  void
+  render(collection_type const& collection, exposition_format format,
+      std::ostream & os)
+  {
+    switch (format) {
+    case fmt_text:  collection_to_text(collection, os); break;
+    case fmt_proto: collection_to_proto_delimited(collection, os); break;
+    }
+  }
+
+  std::string
+  collection_to_text(collection_type const& collection) {
+    std::ostringstream os;
+    collection_to_text(collection, os);
+    return os.str();
+  }
+
+  void
+  collection_to_text(collection_type const& collection, std::ostream & os) {
+    for (auto mf : collection) {
+      prometheus::metricfamily_proto_to_ostream(os, mf);
+    }
+  }
+
+  size_t
+  calculate_proto_delimited_size(collection_type const& collection) {
+    size_t total_size = 0;
+    for (auto message : collection) {
+      size_t message_size = message->ByteSize();
+      using google::protobuf::io::CodedOutputStream;
+      total_size += message_size + CodedOutputStream::VarintSize32(message_size);
+    }
+    return total_size;
+  }
+
+  void
+  protobuf_delimited(collection_type const& collection,
+      google::protobuf::io::ZeroCopyOutputStream & stream)
+  {
+    google::protobuf::io::CodedOutputStream coder(&stream);
+    for (auto message : collection) {
+      coder.WriteVarint32(message->ByteSize());
+      message->SerializeToCodedStream(&coder);
+    }
+  }
+
+  std::string
+  collection_to_proto_delimited(collection_type const& collection) {
+    std::string output;
+    output.reserve(calculate_proto_delimited_size(collection));
+    google::protobuf::io::StringOutputStream stream(&output);
+    protobuf_delimited(collection, stream);
+    return output;
+  }
+
+  void
+  collection_to_proto_delimited(collection_type const& collection, std::ostream & os) {
+    google::protobuf::io::OstreamOutputStream stream(&os);
+    protobuf_delimited(collection, stream);
+  }
 
   static std::string escape_type(MetricType const& t) {
     switch (t) {

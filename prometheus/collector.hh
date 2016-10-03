@@ -26,8 +26,6 @@ namespace prometheus {
    public:
     virtual ~ICollector() {}
 
-    typedef std::list<MetricFamilyPtr> collection_type;
-
     // Returns a list of MetricFamily protobufs ready to be
     // exported. The called gain ownership of all allocated
     // MetricFamily objects. This method must be thread-safe. It may

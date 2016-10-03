@@ -12,17 +12,9 @@
 
 #define TEXT_FORMAT_CONTENT_TYPE "text/plain; version=0.0.4"
 
-void collect_as_text_format_to_ostream(std::ostream& os) {
-  auto v = prometheus::impl::global_registry.collect();
-  for (auto mf : v) {
-    prometheus::metricfamily_proto_to_ostream(os, mf);
-  }
-}
-
 std::string collect_as_text_format_to_string() {
-  std::ostringstream ss;
-  collect_as_text_format_to_ostream(ss);
-  return ss.str();
+  auto collection = prometheus::impl::global_registry.collect();
+  return prometheus::render(collection, prometheus::fmt_text);
 }
 
 MHD_Response* handle_metrics(struct MHD_Connection* connection) {

@@ -36,7 +36,7 @@ namespace prometheus {
       collectors_.erase(it);
     }
 
-    CollectorRegistry::collection_type CollectorRegistry::collect() const {
+    collection_type CollectorRegistry::collect() const {
       impl::shared_lock<impl::shared_timed_mutex> l(mutex_);
       collection_type metrics;
       for (auto const& c : collectors_) {
