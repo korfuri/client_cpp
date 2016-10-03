@@ -1,7 +1,7 @@
 #ifndef PROMETHEUS_COLLECTOR_HH_
 #define PROMETHEUS_COLLECTOR_HH_
 
-#include "proto/stubs.hh"
+#include "family.hh"
 #include "mutex.hh"
 
 #include <list>
@@ -11,8 +11,6 @@
 namespace prometheus {
 
   namespace impl {
-    using ::prometheus::client::MetricFamily;
-
     class AbstractMetric;
     class CollectorRegistry;
   }
@@ -28,7 +26,7 @@ namespace prometheus {
    public:
     virtual ~ICollector() {}
 
-    typedef std::list<impl::MetricFamily*> collection_type;
+    typedef std::list<MetricFamilyPtr> collection_type;
 
     // Returns a list of MetricFamily protobufs ready to be
     // exported. The called gain ownership of all allocated

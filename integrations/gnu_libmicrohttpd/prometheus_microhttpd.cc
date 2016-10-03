@@ -16,7 +16,6 @@ void collect_as_text_format_to_ostream(std::ostream& os) {
   auto v = prometheus::impl::global_registry.collect();
   for (auto mf : v) {
     prometheus::metricfamily_proto_to_ostream(os, mf);
-    prometheus::delete_metricfamily(mf);
   }
 }
 

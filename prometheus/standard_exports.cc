@@ -96,7 +96,7 @@ namespace prometheus {
     private:
       // Convenience function to add a gauge to the list of
       // MetricFamilies and set its name/help/type and one value.
-      static void set_gauge(std::list<MetricFamily*>& l,
+      static void set_gauge(collection_type& l,
                             std::string const& name,
                             std::string const& help,
                             double value) {
@@ -105,7 +105,7 @@ namespace prometheus {
         mf->set_help(help);
         mf->set_type(::prometheus::client::MetricType::GAUGE);
         mf->add_metric()->mutable_gauge()->set_value(value);
-        l.push_back(mf);
+        l.push_back(MetricFamilyPtr(mf));
       }
 
       const double pagesize_;
@@ -122,8 +122,8 @@ namespace prometheus {
         global_registry.unregister_collector(this);
       }
 
-      std::list<MetricFamily*> collect() const {
-        std::list<MetricFamily*> l;
+      collection_type collect() const {
+        collection_type l;
         ProcSelfStatReader pss;
         ProcStatReader ps;
         ProcSelfFdReader psfd;

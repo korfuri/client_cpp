@@ -150,13 +150,13 @@ namespace prometheus {
     }
   }
 
-  std::string metricfamily_proto_to_string(MetricFamily const* mf) {
+  std::string metricfamily_proto_to_string(MetricFamilyPtr mf) {
     std::ostringstream ss;
     metricfamily_proto_to_ostream(ss, mf);
     return ss.str();
   }
 
-  void metricfamily_proto_to_ostream(std::ostream& os, MetricFamily const* mf) {
+  void metricfamily_proto_to_ostream(std::ostream& os, MetricFamilyPtr mf) {
     if (!mf->has_name() || !mf->has_type()) {
       throw impl::OutputFormatterException(
 	impl::OutputFormatterException::kMissingRequiredField);

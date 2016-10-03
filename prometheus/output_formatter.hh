@@ -1,19 +1,18 @@
 #ifndef PROMETHEUS_OUTPUT_FORMATTER_HH__
 #define PROMETHEUS_OUTPUT_FORMATTER_HH__
 
-#include "prometheus/proto/metrics.pb.h"
-
 #include <string>
 
-namespace prometheus {
+#include "family.hh"
+#include "prometheus/proto/metrics.pb.h"
 
-  using ::prometheus::client::MetricFamily;
+namespace prometheus {
 
   // Converts from the protobuf exposition format to the text
   // exposition format.
   void metricfamily_proto_to_ostream(
-    std::ostream& os, MetricFamily const* mf);
-  std::string metricfamily_proto_to_string(MetricFamily const* mf);
+    std::ostream& os, MetricFamilyPtr mf);
+  std::string metricfamily_proto_to_string(MetricFamilyPtr mf);
 
   // Escaping functions for each element of the text format.
   std::string escape_double(double d);
