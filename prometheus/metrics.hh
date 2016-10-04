@@ -100,12 +100,26 @@ namespace prometheus {
         }
       }
 
+      // implement construction from temporaries to facilitate the use of:
+      //    auto c = makeCounter(...);
+      LabeledMetric(LabeledMetric&& other) :
+        AbstractMetric(other),
+        labelnames_(std::move(other.labelnames_)),
+        mutex_()
+      {}
+
       // Returns the ValueType instance indexed by the set of label
       // values passed. The ValueType instance is created if needed.
       ValueType& labels(stringarray const& labelvalues) {
         std::unique_lock<std::mutex> l(mutex_);
         return (values_.insert(typename map::value_type(
                     labelvalues, default_value_))).first->second;
+      }
+
+      template <typename... Args>
+      ValueType&
+      labels(Args... args) {
+        return labels({args...});
       }
 
       // Removes a given set of label values and the instance of

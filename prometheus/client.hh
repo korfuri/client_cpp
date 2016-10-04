@@ -49,6 +49,27 @@ namespace prometheus {
     using impl::UnlabeledMetric<impl::HistogramValue>::UnlabeledMetric;
   };
 
+  template <typename... Args>
+  std::array<std::string, sizeof...(Args)>
+  labels(Args... args) {
+    return {args...};
+  }
+
+  template <size_t Dims>
+  Counter<Dims>
+  makeCounter(std::string const& name, std::string const& help,
+              std::array<std::string, Dims> const& lables)
+  {
+    return Counter<Dims>(name, help, lables);
+  }
+
+  inline
+  Counter<0>
+  makeCounter(std::string const& name, std::string const& help) {
+    return Counter<0>(name, help);
+  }
+
+  
 } /* namespace prometheus */
 
 #endif /* PROMETHEUS_CLIENT_HH__ */

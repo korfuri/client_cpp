@@ -342,4 +342,22 @@ namespace {
     EXPECT_EQ(950, gauge_to_current_time.value());
   }
 
+  // test lables(...) helper
+  Counter<3> c3("test_counter3", "test Counter<3>", labels("x", "y", "z"));
+
+  // test rvalue reference assignment and makeCounter(...)
+  auto auto_c = makeCounter("test_counter_auto", "test counter declared auto",
+                            labels("x", "y", "z"));
+
+  auto auto_c0 = makeCounter("test_counter_auto0", 
+                             "test counter declared auto without labels");
+
+  TEST_F(ClientCPPTest, AutoCounterTest) {
+    c3.labels("foo", "bar", "baz").inc();
+    EXPECT_EQ(1.0, c3.labels("foo", "bar", "baz").value());
+
+    auto_c.labels("foo", "bar", "baz").inc();
+    EXPECT_EQ(1.0, auto_c.labels("foo", "bar", "baz").value());
+
+  }
 } /* namespace */
