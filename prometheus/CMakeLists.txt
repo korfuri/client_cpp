@@ -14,7 +14,8 @@ endif()
 pkg_check_modules(ICU REQUIRED icu-io icu-i18n icu-uc)
 pkg_check_modules(PB REQUIRED protobuf)
 
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${ICU_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${ICU_INCLUDE_DIRS}
+                    ${GTEST_INCLUDE_DIRS})
 link_directories(${ICU_LIBRARY_DIRS})
 
 add_library(prometheus-client SHARED
@@ -39,6 +40,22 @@ target_compile_options(prometheus-client PRIVATE ${PROMETHEUS_CLIENT_CXX_STANDAR
 add_executable(client_demo client_demo_main.cc)
 target_link_libraries(client_demo prometheus-client)
 target_compile_options(client_demo PRIVATE ${PROMETHEUS_CLIENT_CXX_STANDARD})
+
+function(prometheus_test test_name)
+  add_executable(${test_name} ${test_name}.cc)
+  target_link_libraries(${test_name} prometheus-client
+                        gtest gtest_main fake_clock ${ICU_LIBRARIES})
+  target_compile_options(${test_name} PRIVATE ${PROMETHEUS_CLIENT_CXX_STANDARD})
+  add_test(${test_name} ${test_name})
+endfunction()
+
+if(PROMETHEUS_HAS_LOCAL_GTEST) 
+  include_directories(${PROMETHEUS_FAKE_CLOCK_DIR})
+  prometheus_test(client_test)
+  prometheus_test(client_concurrent_test)
+  #prometheus_test(benchmark_test)
+  prometheus_test(output_formatter)
+endif()
 
 set(PKG_CONFIG_LIBDIR "\${prefix}/lib")
 set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include/")
