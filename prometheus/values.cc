@@ -60,16 +60,11 @@ namespace prometheus {
 
   namespace impl {
 
-    using ::prometheus::client::Bucket;
-    using ::prometheus::client::Histogram;
-    using ::prometheus::client::Metric;
-    using ::prometheus::client::MetricFamily;
-
-    void BaseGaugeValue::collect_value(Metric* m) const {
+    void BaseGaugeValue::collect_value(client::Metric* m) const {
       m->mutable_gauge()->set_value(value_);
     }
 
-    /* static */ void BaseGaugeValue::set_metricfamily_type(MetricFamily* mf) {
+    void BaseGaugeValue::set_metricfamily_type(client::MetricFamily* mf) {
       mf->set_type(::prometheus::client::MetricType::GAUGE);
     }
 
@@ -90,11 +85,11 @@ namespace prometheus {
         ;
     }
 
-    void CounterValue::collect_value(Metric* m) const {
+    void CounterValue::collect_value(client::Metric* m) const {
       m->mutable_counter()->set_value(value_);
     }
 
-    /* static */ void CounterValue::set_metricfamily_type(MetricFamily* mf) {
+    /* static */ void CounterValue::set_metricfamily_type(client::MetricFamily* mf) {
       mf->set_type(::prometheus::client::MetricType::COUNTER);
     }
 
@@ -162,15 +157,15 @@ namespace prometheus {
       }
     }
 
-    void HistogramValue::collect_value(Metric* m) const {
-      Histogram* h = m->mutable_histogram();
+    void HistogramValue::collect_value(client::Metric* m) const {
+      client::Histogram* h = m->mutable_histogram();
       auto it = values_.begin();
       {
         std::lock_guard<std::mutex> l(mutex_);
         h->set_sample_count(values_.back());
         h->set_sample_sum(samples_sum_);
         for (auto const& l : levels_) {
-          Bucket* b = h->add_bucket();
+          client::Bucket* b = h->add_bucket();
           b->set_upper_bound(l);
           b->set_cumulative_count(*it);
           ++it;
@@ -178,7 +173,7 @@ namespace prometheus {
       }
     }
 
-    /* static */ void HistogramValue::set_metricfamily_type(MetricFamily* mf) {
+    /* static */ void HistogramValue::set_metricfamily_type(client::MetricFamily* mf) {
       mf->set_type(::prometheus::client::MetricType::HISTOGRAM);
     }
 

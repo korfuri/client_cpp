@@ -345,7 +345,7 @@ namespace {
   // test lables(...) helper
   Counter<3> c3("test_counter3", "test Counter<3>", labels("x", "y", "z"));
 
-  // test rvalue reference assignment and makeCounter(...)
+  // test rvalue reference construction and makeCounter(...)
   auto auto_c = makeCounter("test_counter_auto", "test counter declared auto",
                             labels("x", "y", "z"));
 
@@ -359,5 +359,17 @@ namespace {
     auto_c.labels("foo", "bar", "baz").inc();
     EXPECT_EQ(1.0, auto_c.labels("foo", "bar", "baz").value());
 
+    auto_c0.inc();
+    EXPECT_EQ(1.0, auto_c0.value());
+
+    // we need compile-time unit tests for snippets that should not compile,
+    // like these:
+
+    // no copy construction
+    // auto copy_c( c3 );
+
+    // label count mismatches ... if we deceide to be strict
+    // auto_c.labels("too", "few").inc();
+    // auto_c.labels("way", "way", "too", "many").inc();
   }
 } /* namespace */

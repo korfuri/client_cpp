@@ -18,7 +18,7 @@ namespace prometheus {
 
 
   // This wrapper ensures that histogram levels are not confused with
-  // label name sets or other arguments when building LabeledMetrics.
+  // label name sets or other arguments when building labeled Metrics.
   std::vector<double> histogram_levels(std::vector<double>&&);
 
   // Constructs a list of `count` histogram buckets increasing
@@ -36,9 +36,6 @@ namespace prometheus {
 					      double increment = 1.0);
 
   namespace impl {
-
-    using ::prometheus::client::Metric;
-    using ::prometheus::client::MetricFamily;
 
     class BaseScalarValue {
       // A base class used by the various scalar values (counter and gauges).
@@ -58,12 +55,24 @@ namespace prometheus {
     };
 
     class BaseGaugeValue : public BaseScalarValue {
-      // A base class used by the various types of gauges. We separate
-      // "Inc/Dec" gauges from "Set" gauges to allow us to squeeze
-      // some performance by using different types of memory barriers.
-     public:
-      void collect_value(Metric* m) const;
-      static void set_metricfamily_type(MetricFamily* mf);
+      // A base class used by the various types of gauges.
+    public:
+      void collect_value(client::Metric* m) const;
+      static void set_metricfamily_type(client::MetricFamily* mf);
+    };
+
+    // We separate "Inc/Dec" gauges from "Set" gauges to allow us to squeeze
+    // some performance by using different types of memory barriers. But we 
+    // also have a plain old Gauge.
+
+    class GaugeValue : public BaseGaugeValue {
+    public:
+      void set(double value) { value_ = value; }
+      void inc(double value = 1) { 
+        double current = value_.load();
+        while (!(value_.compare_exchange_weak(current, current + value)));
+      }
+      void dec(double value = 1) { inc(-value); }
     };
 
     class SetGaugeValue : public BaseGaugeValue {
@@ -86,8 +95,8 @@ namespace prometheus {
       // NegativeCounterIncrementException.
      public:
       void inc(double value = 1.0);
-      void collect_value(Metric* m) const;
-      static void set_metricfamily_type(MetricFamily* mf);
+      void collect_value(client::Metric* m) const;
+      static void set_metricfamily_type(client::MetricFamily* mf);
     };
 
     class HistogramValue {
@@ -117,10 +126,10 @@ namespace prometheus {
       double value(double threshold = kInf) const;
 
       // Collects the value to a Metric.
-      void collect_value(Metric* m) const;
+      void collect_value(client::Metric* m) const;
 
       // Sets the type of a MetricFamily that contains this kind of Value.
-      static void set_metricfamily_type(MetricFamily* mf);
+      static void set_metricfamily_type(client::MetricFamily* mf);
 
      private:
       mutable std::mutex mutex_;
