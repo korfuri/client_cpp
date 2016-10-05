@@ -96,7 +96,7 @@ namespace prometheus {
         }
       }
 
-      // Implement construction from rvalues to facilitate:
+      // Allow construction from rvalues to facilitate:
       // auto c = makeCounter(...);
       Metric(Metric&& other) :
         AbstractMetric(other),

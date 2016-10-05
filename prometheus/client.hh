@@ -6,6 +6,7 @@
 #include "registry.hh"
 #include "util/extend_array.hh"
 #include "values.hh"
+#include "policy.hh"
 
 #include <array>
 #include <string>
@@ -38,32 +39,19 @@ namespace prometheus {
     using impl::Metric<Dims, impl::GaugeValue>::Metric;
   };
   
+  template <typename ValueType, typename... Args>
+  impl::Metric<impl::get_dims<Args...>::value, ValueType>
+  makeMetric(std::string const& name, std::string const& help, Args &&... args) {
+    using metric_type = impl::Metric<impl::get_dims<Args...>::value, ValueType>;
+    return metric_type(name, help, args...);
+  }
+
   template <typename... Args>
-  std::array<std::string, sizeof...(Args)>
-  labels(Args const& ... args) {
-    return {args...};
+  impl::Metric<impl::get_dims<Args...>::value, impl::CounterValue>
+  makeCounter(std::string const& name, std::string const& help, Args &&... args) {
+    return makeMetric<impl::CounterValue>(name, help, std::forward<Args>(args)...);
   }
 
-  // TODO(@agnat): remove when labels become a policy
-  template <size_t Dims, typename... ValueArgs>
-  Counter<Dims>
-  makeCounter(std::string const& name, std::string const& help,
-              std::array<std::string, Dims> const& lables,
-              ValueArgs const&... args)
-  {
-    return Counter<Dims>(name, help, lables, args...);
-  }
-
-  // TODO(@agnat): needs perfect forwarding when labels become a policy
-  template <typename... ValueArgs>
-  Counter<0>
-  makeCounter(std::string const& name, std::string const& help, 
-              ValueArgs const&... args)
-  {
-    return Counter<0>(name, help, args...);
-  }
-
-  
 } /* namespace prometheus */
 
 #endif /* PROMETHEUS_CLIENT_HH__ */

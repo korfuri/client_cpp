@@ -349,6 +349,8 @@ namespace {
   auto auto_c = makeCounter("test_counter_auto", "test counter declared auto",
                             labels("x", "y", "z"));
 
+  auto ttt = makeMetric<impl::GaugeValue>("foo", "bar", labels("foo", "bar"));
+  
   auto auto_c0 = makeCounter("test_counter_auto0", 
                              "test counter declared auto without labels");
 
@@ -359,10 +361,12 @@ namespace {
     auto_c.labels("foo", "bar", "baz").inc();
     EXPECT_EQ(1.0, auto_c.labels("foo", "bar", "baz").value());
 
+    ttt.labels("foo_0", "bar_0").set(15);
+    
     auto_c0.inc();
     EXPECT_EQ(1.0, auto_c0.value());
 
-    // we need compile-time unit tests for snippets that should not compile,
+    // we need compile-time unit tests for snippets that should _not_ compile,
     // like these:
 
     // no copy construction
