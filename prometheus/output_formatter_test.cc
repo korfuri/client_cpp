@@ -8,12 +8,12 @@ namespace {
   using namespace prometheus;
   using namespace prometheus::impl;
 
-  MetricFamilyPtr make_family() { return MetricFamilyPtr( new MetricFamily()); }
+  MetricFamilyPtr make_metricfamily() { return MetricFamilyPtr( new MetricFamily()); }
 
   class OutputFormatterTest : public ::testing::Test {};
 
   TEST_F(OutputFormatterTest, CounterTest) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: COUNTER metric: { counter: { value: 4.2 "
         "} }",
@@ -28,7 +28,7 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, GaugeTest) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: GAUGE metric: { gauge: { value: 4.2 } }",
         &*mf));
@@ -42,7 +42,7 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, UntypedTest) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: UNTYPED metric: { untyped: { value: 4.2 "
         "} }",
@@ -57,7 +57,7 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, HistogramTest) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: HISTOGRAM metric: { histogram: { bucket "
         "{ upper_bound: 4.2 cumulative_count: 2 } } }",
@@ -67,83 +67,83 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, EmptyMetricFamily) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString("", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, NoMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: COUNTER", &*mf));
     EXPECT_NO_THROW(metricfamily_proto_to_string(mf));
   }
 
   TEST_F(OutputFormatterTest, NoType) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, CounterTypeNoCounterMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: COUNTER metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, GaugeTypeNoGaugeMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: GAUGE metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, SummaryTypeNoSummaryMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: SUMMARY metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, UntypedTypeNoUntypedMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: UNTYPED metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, HistogramTypeNoHistogramMetric) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: HISTOGRAM metric: {}", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, CounterNoValue) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: COUNTER metric: { counter: {} }", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, GaugeNoValue) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: GAUGE metric: { gauge: {} }", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, UntypedNoValue) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: UNTYPED metric: { untyped: {} }", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, HistogramNoBuckets) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: HISTOGRAM metric: { histogram: {} }",
         &*mf));
@@ -151,14 +151,14 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, SummaryNoQuantiles) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: SUMMARY metric: { summary: {} }", &*mf));
     EXPECT_THROW(metricfamily_proto_to_string(mf), OutputFormatterException);
   }
 
   TEST_F(OutputFormatterTest, HistogramBucketNoCount) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: HISTOGRAM metric: { histogram: { bucket "
         "{ upper_bound: 4.2 } } }",
@@ -167,7 +167,7 @@ namespace {
   }
 
   TEST_F(OutputFormatterTest, HistogramBucketNoUpperBound) {
-    auto mf = make_family();
+    auto mf = make_metricfamily();
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
         "name: \"a\" help: \"b\" type: HISTOGRAM metric: { histogram: { bucket "
         "{ cumulative_count: 2 } } }",
