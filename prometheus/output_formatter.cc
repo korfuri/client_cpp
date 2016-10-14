@@ -102,7 +102,7 @@ namespace prometheus {
       return "untyped";
     default:
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kInvalidMetricType);
+        impl::OutputFormatterException::kInvalidMetricType);
     }
   }
 
@@ -110,15 +110,15 @@ namespace prometheus {
     for (int i = 0; i < m.label_size(); ++i) {
       LabelPair const& lp = m.label(i);
       ss << escape_label_name(lp.name()) << '='
-	 << escape_label_value(lp.value());
+         << escape_label_value(lp.value());
       if (i + 1 < m.label_size()) {
-	ss << ',';
+        ss << ',';
       };
     }
   }
 
   void metric_proto_to_ostream_common(std::string const& escaped_name,
-				      Metric const& m, std::ostream& ss) {
+                                      Metric const& m, std::ostream& ss) {
     ss << escaped_name;
     if (m.label_size() > 0) {
       ss << '{';
@@ -129,76 +129,76 @@ namespace prometheus {
   }
 
   void counter_proto_to_ostream(std::string const& escaped_name,
-				Metric const& m, std::ostream& ss) {
+                                Metric const& m, std::ostream& ss) {
     if (!m.has_counter() || !m.counter().has_value()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     metric_proto_to_ostream_common(escaped_name, m, ss);
     ss << escape_double(m.counter().value()) << std::endl;
   }
 
   void gauge_proto_to_ostream(std::string const& escaped_name,
-			      Metric const& m, std::ostream& ss) {
+                              Metric const& m, std::ostream& ss) {
     if (!m.has_gauge() || !m.gauge().has_value()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     metric_proto_to_ostream_common(escaped_name, m, ss);
     ss << escape_double(m.gauge().value()) << std::endl;
   }
 
   void summary_proto_to_ostream(std::string const& escaped_name,
-				Metric const& m, std::ostream& ss) {
+                                Metric const& m, std::ostream& ss) {
     throw impl::OutputFormatterException(
       impl::OutputFormatterException::kSummariesNotImplemented);
   }
 
   void histogram_proto_to_ostream(std::string const& escaped_name,
-				  Metric const& m, std::ostream& ss) {
+                                  Metric const& m, std::ostream& ss) {
     if (!m.has_histogram()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     Histogram const& h = m.histogram();
     if (h.bucket_size() <= 0) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     for (int i = 0; i < h.bucket_size(); ++i) {
       Bucket const& b = h.bucket(i);
       if (!b.has_upper_bound() || !b.has_cumulative_count()) {
-	throw impl::OutputFormatterException(
-	  impl::OutputFormatterException::kMissingRequiredField);
+        throw impl::OutputFormatterException(
+          impl::OutputFormatterException::kMissingRequiredField);
       }
       ss << escaped_name << '{';
       metric_labels_proto_to_ostream(m, ss);
       if (m.label_size() > 0) {
-	ss << ',';
+        ss << ',';
       }
       // TODO(korfuri): Do we need quotes around the value here?
       // le="0.1" or le=0.1?
       ss << "le=\"" << escape_double(b.upper_bound())
-	 << "\"} " << b.cumulative_count() << std::endl;
+         << "\"} " << b.cumulative_count() << std::endl;
     }
   }
 
   void untyped_proto_to_ostream(std::string const& escaped_name,
-				Metric const& m, std::ostream& ss) {
+                                Metric const& m, std::ostream& ss) {
     if (!m.has_untyped() || !m.untyped().has_value()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     metric_proto_to_ostream_common(escaped_name, m, ss);
     ss << escape_double(m.untyped().value()) << std::endl;
   }
 
   void metric_proto_to_ostream(std::string const& escaped_name,
-			       Metric const& m, MetricFamily const& mf,
-			       std::ostream& ss) {
+                               Metric const& m, MetricFamily const& mf,
+                               std::ostream& ss) {
     if (!mf.has_type()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     switch (mf.type()) {
     case MetricType::COUNTER:
@@ -218,7 +218,7 @@ namespace prometheus {
       return;
     default:
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kInvalidMetricType);
+        impl::OutputFormatterException::kInvalidMetricType);
     }
   }
 
@@ -231,14 +231,14 @@ namespace prometheus {
   void metricfamily_proto_to_ostream(std::ostream& os, MetricFamilyPtr mf) {
     if (!mf->has_name() || !mf->has_type()) {
       throw impl::OutputFormatterException(
-	impl::OutputFormatterException::kMissingRequiredField);
+        impl::OutputFormatterException::kMissingRequiredField);
     }
     std::string escaped_name = escape_metric_name(mf->name());
     os << "# HELP " << escaped_name << ' ' << escape_help(mf->help())
        << std::endl;
     if (mf->has_help()) {
       os << "# TYPE " << escaped_name << ' ' << escape_type(mf->type())
-	 << std::endl;
+         << std::endl;
     }
     for (int i = 0; i < mf->metric_size(); ++i) {
       Metric const& m = mf->metric(i);

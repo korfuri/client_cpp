@@ -280,8 +280,8 @@ namespace {
 
     {
       typedef std::chrono::duration<
-	double,
-	std::chrono::milliseconds::period> ms;
+        double,
+        std::chrono::milliseconds::period> ms;
       IntervalAccumulator<testing::fake_clock, ms> _(
           histogram_elapsed_time);
       testing::fake_clock::advance(std::chrono::seconds(10));
@@ -316,8 +316,8 @@ namespace {
 
     {
       typedef std::chrono::duration<
-	double,
-	std::chrono::milliseconds::period> ms;
+        double,
+        std::chrono::milliseconds::period> ms;
       IntervalReporter<testing::fake_clock, ms> _(
           gauge_elapsed_time);
       testing::fake_clock::advance(std::chrono::seconds(10));

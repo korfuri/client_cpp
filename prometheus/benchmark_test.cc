@@ -16,9 +16,9 @@ namespace {
   class BenchmarkTest : public ::testing::Test {};
 
   SetGauge<2> test_runtime("test_runtime_last_s",
-			   ("Runtime of the last run of tests, by test name"
-			    " and thread count."),
-			   {"test", "threads"});
+                           "Runtime of the last run of tests, by test name"
+                           " and thread count.",
+                           {"test", "threads"});
 
   // This is the harness that runs the actual benchmarks. It spawns
   // `threads` threads and makes them run the benchmark function, then
