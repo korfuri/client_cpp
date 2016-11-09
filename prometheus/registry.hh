@@ -2,7 +2,7 @@
 #define PROMETHEUS_REGISTRY_HH__
 
 #include "collector.hh"
-#include "proto/stubs.hh"
+#include "family.hh"
 #include "mutex.hh"
 
 #include <ostream>
@@ -20,8 +20,6 @@ namespace prometheus {
      public:
       CollectorRegistry();
       ~CollectorRegistry();
-
-      using collection_type = Collector::collection_type;
 
       // Returns a list of MetricFamily protobufs ready to be
       // exported. The called gain ownership of all allocated
