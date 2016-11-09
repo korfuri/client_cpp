@@ -23,6 +23,10 @@ addons:
       ## For integrations
       - libmicrohttpd-dev
 
+# disable the default submodule logic
+git:
+  submodules: false
+
 # Eventually, Bazel will have binary packages and we'll be able to
 # just download a prebuilt distribution of Bazel. For now, build it
 # from source every time.
@@ -32,6 +36,8 @@ before_install:
   - chmod +x bazel-0.1.0-installer-linux-x86_64.sh
   - ./bazel-0.1.0-installer-linux-x86_64.sh --user
   - cat ~/.bazelrc >> .bazelrc
+  - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
 
 script:
   - bazel test //prometheus/...
@@ -40,6 +46,7 @@ script:
   - CC=gcc-4.9 CXX=g++-4.9 cmake ..
   - make -j3
   - prometheus/client_demo
+  - make test
   - popd
   - pushd integrations/gnu_libmicrohttpd
   - make

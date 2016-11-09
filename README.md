@@ -19,15 +19,28 @@ This project uses [Bazel](http://bazel.io) or CMake to build
   * `apt-get install libicu-dev` for Unicode support
   * `apt-get install libprotobuf-dev protobuf-compiler` for Protocol Buffers
 
-NOTE: Test execution in CMake has not been implemented.
+On Mac OS we test using dependencies from homebrew:
 
-## Requirements for tests when not using Bazel
+````bash
+$ brew install protobuf icu4c
+````
+
+## Testing with CMake
 
 The Bazel workspace will pull these automatically for you. If you're
 not using Bazel, you'll need:
 
   * [gtest](https://code.google.com/p/googletest/) is used in unit tests.
   * [fake_clock](https://github.com/korfuri/fake_clock) is used in unit tests.
+
+Both dependencies are linked as git submodules. To get the submodules run:
+
+````bash
+$ git submodule update --init
+````
+
+Now regenerate your build system using `cmake` and run the tests with 
+`make test` or what have you.
 
 # Usage
 

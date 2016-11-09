@@ -159,7 +159,6 @@ int main(int argc, char**argv) {
       if (m->name() == "test_runtime_last_s") {
         prometheus::metricfamily_proto_to_ostream(std::cout, m);
       }
-      prometheus::delete_metricfamily(m);
     }
   }
   return retval;
