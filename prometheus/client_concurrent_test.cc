@@ -100,9 +100,9 @@ namespace {
   }
 
   Histogram<1> h1("test_histogram1", "Test Histogram<1>",
-		  {"threadgroup"});
+                  {"threadgroup"});
   Histogram<1> h1a("test_histogram1a", "Test Histogram<1>",
-		   {"x"}, histogram_levels({5, 10, 15, 20, 25, 30, 40, 50, 60, 100}));
+                   {"x"}, histogram_levels({5, 10, 15, 20, 25, 30, 40, 50, 60, 100}));
 
   void f_histogramtest(int threadid) {
     std::string threadgroup = std::to_string(threadid % 4);

@@ -11,12 +11,12 @@
              "</head><body>libmicrohttpd demo</body></html>"
 
 static int ahc_echo(void * cls,
-		    struct MHD_Connection * connection,
-		    const char * url,
-		    const char * method,
+                    struct MHD_Connection * connection,
+                    const char * url,
+                    const char * method,
                     const char * version,
-		    const char * upload_data,
-		    size_t * upload_data_size,
+                    const char * upload_data,
+                    size_t * upload_data_size,
                     void ** ptr) {
   static int dummy;
   const char * page = cls;
@@ -46,8 +46,8 @@ static int ahc_echo(void * cls,
   }
   record_stats_before_queue_response(MHD_HTTP_OK, response);
   ret = MHD_queue_response(connection,
-			   MHD_HTTP_OK,
-			   response);
+                           MHD_HTTP_OK,
+                           response);
   MHD_destroy_response(response);
   return ret;
 }
@@ -56,12 +56,12 @@ int main() {
   install_process_exports();
   struct MHD_Daemon * d;
   d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-		       8080,
-		       NULL,
-		       NULL,
-		       &ahc_echo,
-		       PAGE,
-		       MHD_OPTION_END);
+                       8080,
+                       NULL,
+                       NULL,
+                       &ahc_echo,
+                       PAGE,
+                       MHD_OPTION_END);
   if (d == NULL)
     return 1;
   for (;;) { sleep(60); }

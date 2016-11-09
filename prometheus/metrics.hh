@@ -19,10 +19,6 @@
 namespace prometheus {
   namespace impl {
 
-    using ::prometheus::client::LabelPair;
-    using ::prometheus::client::MetricFamily;
-    using ::prometheus::client::Metric;
-
     class Registry;
 
     class AbstractMetric {
@@ -45,9 +41,9 @@ namespace prometheus {
 
       // These static methods wrap operations on protobuf objects so
       // the header only needs a forward declaration of the classes.
-      static Metric* add_metric(MetricFamily* mf);
-      static LabelPair* add_label(Metric* m);
-      static void set_label(LabelPair* l, std::string const& name,
+      static client::Metric* add_metric(client::MetricFamily* mf);
+      static client::LabelPair* add_label(client::Metric* m);
+      static void set_label(client::LabelPair* l, std::string const& name,
                             std::string const& value);
 
       std::string name_;
@@ -55,7 +51,7 @@ namespace prometheus {
     };
 
     template <int N, class ValueType>
-    class LabeledMetric : public AbstractMetric {
+    class Metric : public AbstractMetric {
       // A labeled metric has 1 or more labels. It contains a
       // collection of ValueType objects, indexed by the set of label
       // values that represent this value.
@@ -72,12 +68,11 @@ namespace prometheus {
       // inference of gcc.
       //
       // template <typename... ValueArgs>
-      // LabeledMetric(std::string const& name, std::string const& help,
+      // Metric(std::string const& name, std::string const& help,
       //               stringarray const& labelnames, ValueArgs const&... va) :
-      // 	LabeledMetric(name, help, labelnames, global_collector,
-      // va...) {}
+      //   Metric(name, help, labelnames, global_collector, va...) {}
 
-      // A LabeledMetric is constructed with a name, help text, and a
+      // A Metric is constructed with a name, help text, and a
       // set of label names, as well as any arguments required by the
       // ValueType.
       // At construction time, a "master" ValueType is created and any
@@ -85,12 +80,12 @@ namespace prometheus {
       // this ValueType. This allows us to do expensive one-off
       // initialization only once.
       template <typename... ValueArgs>
-      LabeledMetric(std::string const& name, std::string const& help,
-                    stringarray const& labelnames, ValueArgs const&... va)
+      Metric(std::string const& name, std::string const& help,
+                    stringarray const& labelnames, ValueArgs&&... va)
           : AbstractMetric(name, help, &global_collector),
-            default_value_(va...),
+            default_value_(std::forward<ValueArgs>(va)...),
             labelnames_(labelnames) {
-        static_assert(N >= 1, "A LabeledMetric should have at least 1 label.");
+        static_assert(N >= 1, "A Metric should have at least 1 label.");
         const std::regex label_name_re("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
         for (auto const& l : labelnames_) {
           if (l == "le" || l == "quantile" ||
@@ -100,6 +95,15 @@ namespace prometheus {
         }
       }
 
+      // Allow construction from rvalues to facilitate:
+      // auto c = makeCounter(...);
+      Metric(Metric&& other) :
+        AbstractMetric(other),
+        default_value_(std::move(other.default_value_)),
+        labelnames_(std::move(other.labelnames_)),
+        mutex_()
+      {}
+
       // Returns the ValueType instance indexed by the set of label
       // values passed. The ValueType instance is created if needed.
       ValueType& labels(stringarray const& labelvalues) {
@@ -108,22 +112,29 @@ namespace prometheus {
                     labelvalues, default_value_))).first->second;
       }
 
+      template <typename... Args>
+      ValueType&
+      labels(Args... args) {
+        static_assert(sizeof...(Args) == N, "label count mismatch");
+        return labels({args...});
+      }
+
       // Removes a given set of label values and the instance of
       // ValueType it references. No-op if this set of label values
       // did not reference a ValueType instance yet. This invalidates
       // any previously returned ValueType reference to the ValueType
       // instance referred to by this set of labelvalues.
       void remove(stringarray const& labelvalues) {
-	std::unique_lock<std::mutex> l(mutex_);
-	values_.erase(labelvalues);
+        std::unique_lock<std::mutex> l(mutex_);
+        values_.erase(labelvalues);
       }
 
       // Removes all sets of label values and their corresponding
       // instance of ValueType. This invalidates any previously
       // returned ValueType reference.
       void clear() {
-	std::unique_lock<std::mutex> l(mutex_);
-	values_.clear();
+        std::unique_lock<std::mutex> l(mutex_);
+        values_.clear();
       }
 
       // Collects all values in this metric to a protobuf
@@ -133,11 +144,11 @@ namespace prometheus {
         ValueType::set_metricfamily_type(mf);
         std::unique_lock<std::mutex> l(mutex_);
         for (const auto& it_v : values_) {
-          Metric* m = add_metric(mf);
+          client::Metric* m = add_metric(mf);
           auto it_labelname = labelnames_.begin();
           auto it_labelvalue = it_v.first.begin();
           while (it_labelname != labelnames_.end()) {
-            LabelPair* l = add_label(m);
+            client::LabelPair* l = add_label(m);
             set_label(l, *it_labelname, *it_labelvalue);
             ++it_labelname;
             ++it_labelvalue;
@@ -154,7 +165,7 @@ namespace prometheus {
     };
 
     template <class ValueType>
-    class UnlabeledMetric : public AbstractMetric, public ValueType {
+    class Metric<0, ValueType> : public AbstractMetric, public ValueType {
       // An unlabeled metric contains one and only one instance of the
       // ValueType. For convenience, we model this through inheritance
       // so it is possible to call the methods of the ValueType
@@ -166,16 +177,16 @@ namespace prometheus {
       // inference of gcc.
       //
       // template <typename... ValueArgs>
-      // UnlabeledMetric(std::string const& name, std::string const& help,
+      // Metric(std::string const& name, std::string const& help,
       //                 ValueArgs const&... va)
-      // 	: UnlabeledMetric(name, help, global_collector, va...)
+      //   : Metric(name, help, global_collector, va...)
       // {}
 
       template <typename... ValueArgs>
-      UnlabeledMetric(std::string const& name, std::string const& help,
-                      ValueArgs const&... va)
+      Metric(std::string const& name, std::string const& help,
+                      ValueArgs&&... va)
           : AbstractMetric(name, help, &global_collector),
-            ValueType(va...) {}
+            ValueType(std::forward<ValueArgs>(va)...) {}
 
       // Collects the metric and its value to a MetricFamily protobuf.
       virtual void collect(MetricFamily* mf) const {
