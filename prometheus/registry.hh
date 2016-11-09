@@ -49,9 +49,6 @@ namespace prometheus {
 
   } /* namespace impl */
 
-  // Deletes a MetricFamily returned by a call to collect().
-  void delete_metricfamily(::prometheus::client::MetricFamily*);
-
 } /* namespace prometheus */
 
 #endif

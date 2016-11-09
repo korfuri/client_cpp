@@ -24,12 +24,12 @@ namespace prometheus {
     }
 
     Collector::collection_type Collector::collect() const {
-      std::list<MetricFamily*> v;
+      collection_type v;
       impl::shared_lock<impl::shared_timed_mutex> l(mutex_);
       for (auto const m : metrics_) {
         auto* mf = new MetricFamily;
         m->collect(mf);
-        v.push_back(mf);
+        v.push_back(MetricFamilyPtr(mf));
       }
       return v;
     }

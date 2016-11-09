@@ -52,7 +52,6 @@ int main() {
   for (auto m : v) {
     std::string s;
     std::cout << prometheus::metricfamily_proto_to_string(m);
-    prometheus::delete_metricfamily(m);
   }
   return 0;
 }
